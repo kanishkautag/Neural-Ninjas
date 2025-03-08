@@ -1,97 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.5.0/mdb.min.css" rel="stylesheet" />
-    <link href="./index.css" rel="stylesheet" />
+    <title>SkillBoost</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="/calendar/calendar/images/image.png">
-    <title>PocketPlanner</title>
-    <link rel="stylesheet" href="/dashboard/dash.css">
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
+    <script>
+        // On page load or when changing themes, set the correct theme
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Function to toggle between light and dark modes
+        function toggleDarkMode() {
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        }
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
+                    }
+                },
+                fontFamily: {
+                    'body': [
+                        'Inter', 
+                        'ui-sans-serif', 
+                        'system-ui', 
+                        '-apple-system', 
+                        'system-ui', 
+                        'Segoe UI', 
+                        'Roboto', 
+                        'Helvetica Neue', 
+                        'Arial', 
+                        'sans-serif'
+                    ],
+                    'sans': [
+                        'Inter', 
+                        'ui-sans-serif', 
+                        'system-ui', 
+                        '-apple-system', 
+                        'system-ui', 
+                        'Segoe UI', 
+                        'Roboto', 
+                        'Helvetica Neue', 
+                        'Arial', 
+                        'sans-serif'
+                    ]
+                }
+            }
+        }
+    </script>
 </head>
-<style>
-    body {
-        display: grid;
-        background-image: url('https://t4.ftcdn.net/jpg/03/49/77/45/360_F_349774531_GVBujUQPMDHdptTix4m13kQ62Qgy4jiA.jpg');
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
 
-    .one {
-        grid-column: 1 / 2;
-        /* width: 60vw; */
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle" type="button" class="fixed top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 z-50" onclick="toggleDarkMode()">
+            <!-- Dark mode icon (moon) -->
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+            <!-- Light mode icon (sun) -->
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+            </svg>
+        </button>
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 6%;
-
-    }
-
-    .card {
-        grid-column: 2/2;
-        border-radius: 5%;
-        margin-left: 15%;
-        height: 85vh;
-        width: 30vw;
-        box-shadow: 2px 2px 15px white;
-        border-radius: 3%;
-
-    }
-
-    #log {
-        width: 30%;
-        font-size: 110%;
-    }
-</style>
-
-<body class="d-flex justify-content-center p-5">
-    <div class="one">
-        <div class="sidecon" style="color: white;">
-            <h1 style="font-size: 400%;">Get Started!</h1>
-            <p style="font-size: 200%;">Have a good day</p>
+        <!-- Left side content -->
+        <div class="w-full md:w-1/2 flex items-center justify-center p-8 bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-900 dark:to-indigo-900">
+            <div class="text-white max-w-md">
+                <h1 class="text-5xl font-bold mb-6 tracking-tight">Level Up Your Career</h1>
+                <p class="text-2xl mb-8">Discover skills that drive your professional growth</p>
+                <div class="hidden md:block">
+                    <div class="bg-white/20 dark:bg-gray-800/30 backdrop-blur-sm p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-3">Why Choose SkillBoost?</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Personalized learning paths
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Industry-recognized certifications
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Expert mentorship and coaching
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                AI-powered skill recommendations
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="card">
-        <div class="card-header">
-            <center style="margin-top: 15%;">
-                <h3> Create a new account</h3>
-            </center>
-        </div>
-        <form id="loginForm" onsubmit="login(); return false;" class="card-body px-5 py-4">
-            <center>
-                <small><span id="error" style="color: red"></span></small>
-            </center>
-            <center>
+
+        <!-- Right side login form -->
+        <div class="w-full md:w-1/2 flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-all duration-300">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Create your career account</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Your journey to professional growth starts here</p>
+                </div>
                 
-                <label class="custom-field">
-                    <input id="email" type="text" class="input" required />
-                    <span class="placeholder">Email Id</span>
-                </label><br>
-                <label class="custom-field">
-                    <input id="password" type="password" class="input" required />
-                    <span class="placeholder">Password</span>
-                </label>
-            </center>
-            <a href="#" onclick="forgotPass()" style="margin-left: 20%;">Forgot Password</a>
-            <br><br><br>
-            <center>
-                <button id="log" type="submit" class="btn btn-primary" onclick="login()">Login</button>
-            </center>
-            <br><br>
-            <center>
-                <h4>Don't have an account? <a href="signup.html">Sign-up</a></h4>
-            </center>
-        </form>
+                <form id="loginForm" onsubmit="login(); return false;" class="space-y-6">
+                    <div id="error" class="text-red-600 text-center text-sm"></div>
+                    
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                </svg>
+                            </div>
+                            <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-500 dark:focus:border-purple-500" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-500 dark:focus:border-purple-500" required>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="remember" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-purple-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-purple-600 dark:ring-offset-gray-800" >
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="remember" class="text-gray-500 dark:text-gray-400">Remember me</label>
+                            </div>
+                        </div>
+                        <a href="#" onclick="forgotPass()" class="text-sm font-medium text-purple-600 hover:underline dark:text-purple-500">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="w-full text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800 transition-all duration-300">Login</button>
+                    
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-400 text-center">
+                        Don't have an account? <a href="signup.html" class="text-purple-600 hover:underline dark:text-purple-500">Sign-up</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js "></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js "></script>
-    <script src="firebase.js "></script>
-    <script src="index.js"></script>
-</body>
 
+    <script src="firebase.js"></script>
+    <script src="index.js"></script>
+    <script>
+        // Set the theme toggle icons based on current theme
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Change the icons inside the button based on previous settings
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        // Listen for theme toggle clicks to update the icons
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            // Toggle icons
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+        });
+    </script>
+</body>
 </html>
