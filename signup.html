@@ -1,204 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Upskiller - Sign Up</title>
-  <link rel="icon" href="/calendar/calendar/images/image.png">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <link rel="stylesheet" href="./output.css">
-  <style>
-    .fluid-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: -1;
-    }
-    
-    .fluid-bubble {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(99, 102, 241, 0.1);
-      animation: float 20s infinite ease-in-out;
-    }
-    
-    @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(100px, -150px) scale(1.1); }
-      100% { transform: translate(0, 0) scale(1); }
-    }
-    
-    .custom-input {
-      background-color: rgba(30, 41, 59, 0.7);
-      transition: all 0.3s;
-      border-bottom: 2px solid #4f46e5;
-    }
-    
-    .custom-input:focus {
-      border-bottom: 2px solid #818cf8;
-      background-color: rgba(30, 41, 59, 0.9);
-      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1);
-    }
-    
-    .custom-label {
-      transition: all 0.3s;
-      pointer-events: none;
-    }
-    
-    .custom-input:focus + .custom-label,
-    .custom-input:not(:placeholder-shown) + .custom-label {
-      transform: translateY(-1.5rem);
-      font-size: 0.75rem;
-      color: #818cf8;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.5.0/mdb.min.css" rel="stylesheet" />
+    <link href="./index.css" rel="stylesheet" />
+    <link rel="icon" href="/calendar/calendar/images/image.png">
+  <title>PocketPlanner</title>
 </head>
-<body class="bg-slate-900 text-gray-100 min-h-screen flex flex-col md:flex-row items-center justify-center p-4 relative">
-  <!-- Fluid background -->
-  <div class="fluid-bg" id="fluid-bg"></div>
-  
-  <!-- Left section -->
-  <div class="md:w-1/2 p-6 md:p-10 z-10 mb-8 md:mb-0">
-    <div class="max-w-md mx-auto">
-      <h1 class="text-4xl md:text-6xl font-bold mb-3 bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">Welcome back</h1>
-      <p class="text-xl md:text-2xl text-indigo-200 mb-8">Ready to elevate your career with Career Upskiller?</p>
-      <div class="space-y-4 hidden md:block">
-        <div class="flex items-center">
-          <div class="bg-indigo-600 p-2 rounded-full mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <p class="text-gray-300">Personalized skill development paths</p>
+<style>
+    body {
+        display: grid;
+        background-image: url('https://t4.ftcdn.net/jpg/03/49/77/45/360_F_349774531_GVBujUQPMDHdptTix4m13kQ62Qgy4jiA.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .one {
+            grid-column: 1 / 2;
+            /* width: 60vw; */
+           
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6%;
+            
+        }
+    .card{
+        grid-column: 2/2;
+        border-radius: 5%;
+        margin-left: 15%;
+        height: 85vh;
+        width: 30vw;
+        box-shadow: 2px 2px 15px white;
+        border-radius: 3%;
+
+    }
+    #signUpBtn{
+        width: 30%;
+        font-size: 110%;
+    }
+   
+</style>
+
+<body class="d-flex justify-content-center p-5">
+    <div class="one">
+        <div class="sidecon" style="color: white;">
+            <h1 style="font-size: 400%;">Nice to see you again!</h1>
+            <p style="font-size: 200%;">Have a good day</p>
         </div>
-        <div class="flex items-center">
-          <div class="bg-indigo-600 p-2 rounded-full mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <p class="text-gray-300">Track your professional growth</p>
-        </div>
-        <div class="flex items-center">
-          <div class="bg-indigo-600 p-2 rounded-full mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <p class="text-gray-300">Connect with industry experts</p>
-        </div>
-      </div>
     </div>
-  </div>
-  
-  <!-- Form section -->
-  <div class="md:w-1/2 w-full max-w-md z-10">
-    <div class="bg-slate-800 bg-opacity-70 backdrop-blur-lg rounded-2xl shadow-2xl shadow-indigo-500/20 p-8 md:p-10">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-white">Create your account</h2>
-        <p class="text-indigo-300 text-sm mt-1">Start your professional growth journey today</p>
-      </div>
-      
-      <div id="error" class="text-red-500 text-sm text-center mb-4 hidden"></div>
-      
-      <form id="loginForm" onsubmit="signUp(); return false;" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="relative">
-            <input id="firstname" type="text" class="custom-input block w-full px-4 py-3 rounded-lg text-white outline-none placeholder-transparent" placeholder=" " required />
-            <label for="firstname" class="custom-label absolute left-4 top-3 text-gray-400">First Name</label>
-          </div>
-          
-          <div class="relative">
-            <input id="lastname" type="text" class="custom-input block w-full px-4 py-3 rounded-lg text-white outline-none placeholder-transparent" placeholder=" " required />
-            <label for="lastname" class="custom-label absolute left-4 top-3 text-gray-400">Last Name</label>
-          </div>
+    <div class="card">
+        <div class="card-header">
+            <center style="margin-top: 15%;">
+                <h3> Create a new account</h3>
+            </center>
         </div>
-        
-        <div class="relative">
-          <input id="email" type="email" class="custom-input block w-full px-4 py-3 rounded-lg text-white outline-none placeholder-transparent" placeholder=" " required />
-          <label for="email" class="custom-label absolute left-4 top-3 text-gray-400">Email Address</label>
-        </div>
-        
-        <div class="relative">
-          <input id="password" type="password" class="custom-input block w-full px-4 py-3 rounded-lg text-white outline-none placeholder-transparent" placeholder=" " required />
-          <label for="password" class="custom-label absolute left-4 top-3 text-gray-400">Password</label>
-        </div>
-        
-        <button id="signUpBtn" type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-          Sign Up
-        </button>
-      </form>
-      
-      <div class="text-center mt-6">
-        <p class="text-gray-400">Already have an account? <a href="login.html" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">Log In</a></p>
-      </div>
+        <form id="loginForm" onsubmit="signUp(); return false;" class="card-body px-5 py-4">
+            <center>
+                <small><span id="error" style="color: red"></span></small>
+            </center>
+            <center>
+                <label class="custom-field">
+                    <input id="firstname" type="text" class="input" required />
+                    <span class="placeholder">First Name:</span>
+                </label>
+                <br>
+                <label class="custom-field">
+                    <input id="lastname" type="text" class="input" required />
+                    <span class="placeholder">Last Name:</span>
+                </label>
+                <br>
+                <label class="custom-field">
+                    <input id="email" type="text" class="input" required />
+                    <span class="placeholder">Email Id</span>
+                </label><br>
+                <label class="custom-field">
+                    <input id="password" type="password" class="input" required />
+                    <span class="placeholder">Password</span>
+                </label>
+            </center><br /><br />
+       
+            <center>
+                
+                <button id="signUpBtn" onclick="signUp() " class="btn btn-secondary ">Sign Up</button>
+            </center>
+            <br><br>
+            <center>
+                <h4>Already have an account? <a href="login.html">Login</a></h4>
+            </center>
+        </form>
     </div>
-  </div>
-  
-  <!-- Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-database.js"></script>
-  <script src="firebase.js"></script>
-  <script src="index.js"></script>
-  
-  <script>
-    // Create fluid background bubbles
-    const fluidBg = document.getElementById('fluid-bg');
-    const colors = ['rgba(99, 102, 241, 0.1)', 'rgba(139, 92, 246, 0.1)', 'rgba(67, 56, 202, 0.1)'];
-    
-    for (let i = 0; i < 15; i++) {
-      const bubble = document.createElement('div');
-      bubble.classList.add('fluid-bubble');
-      
-      // Random properties
-      const size = Math.random() * 300 + 50;
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      
-      // Style
-      bubble.style.width = `${size}px`;
-      bubble.style.height = `${size}px`;
-      bubble.style.background = color;
-      bubble.style.left = `${Math.random() * 100}%`;
-      bubble.style.top = `${Math.random() * 100}%`;
-      bubble.style.animationDelay = `${Math.random() * 10}s`;
-      bubble.style.animationDuration = `${Math.random() * 20 + 15}s`;
-      
-      fluidBg.appendChild(bubble);
-    }
-    
-    // Error display function
-    function showError(message) {
-      const errorElement = document.getElementById('error');
-      errorElement.textContent = message;
-      errorElement.classList.remove('hidden');
-      
-      setTimeout(() => {
-        errorElement.classList.add('hidden');
-      }, 5000);
-    }
-    
-    // This assumes your existing signUp function will be used
-    // If not already defined, here's a placeholder that you can replace
-    function signUp() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const firstname = document.getElementById('firstname').value;
-      const lastname = document.getElementById('lastname').value;
-      
-      // Firebase authentication code would go here
-      // This is just for demonstration if you don't have it defined already
-      try {
-        // Your existing Firebase code would go here
-        console.log("Sign up with", email, password, firstname, lastname);
-      } catch (error) {
-        showError(error.message || "An error occurred during signup");
-      }
-    }
-  </script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js "></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js "></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-database.js"></script>
+    <script src="firebase.js "></script>
+    <script src="index.js"></script>
 </body>
+
 </html>
