@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Journey Path</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <style>
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .path-stage {
+            position: relative;
+        }
+        
+        .path-stage:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 2.5rem;
+            left: 1.5rem;
+            height: calc(100% - 1rem);
+            width: 2px;
+            background-color: #3B82F6;
+            z-index: 1;
+        }
+        
+        .stage-number {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .completed-stage .stage-number {
+            background-color: #10B981 !important;
+        }
+        
+        .completed-stage::after {
+            background-color: #10B981;
+        }
+        
+        .completed-stage .stage-content {
+            border-color: #10B981;
+            background-color: #ECFDF5;
+        }
+        
+        .locked-stage .stage-checkbox {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 text-white p-6 shadow-md">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold">Learning Journey</h1>
+            <p class="mt-2">Track your progress through personalized learning paths</p>
+        </div>
+    </header>
+    
+    <main class="container mx-auto p-6">
+        <section class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Career Learning Path</h2>
+            
+            <div class="mb-6">
+                <label for="career" class="block text-sm font-medium text-gray-700 mb-2">Career Goal</label>
+                <input type="text" id="career" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Machine Learning Engineer">
+                
+                <div class="mt-4">
+                    <label for="numPoints" class="block text-sm font-medium text-gray-700 mb-2">Number of Learning Points</label>
+                    <input type="number" id="numPoints" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="10" min="5" max="20">
+                </div>
+                
+                <div class="mt-4">
+                    <button id="pathBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:bg-gray-400">
+                        Generate Learning Path
+                    </button>
+                </div>
+                
+                <div class="mt-6 flex justify-between items-center">
+                    <div class="text-sm">
+                        <span id="completedCount">0</span> of <span id="totalStages">0</span> stages completed
+                    </div>
+                    <button id="resetBtn" class="text-sm text-red-600 hover:text-red-800 hidden">
+                        Reset Progress
+                    </button>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                    <div id="progressBar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="pathResults" class="hidden">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Your Learning Path</h3>
+                <div id="pathLoader" class="loader hidden"></div>
+                <div id="learningPath" class="space-y-1 mt-6 max-h-96 overflow-y-auto pr-2">
+                    <!-- Learning path stages will appear here -->
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <button id="saveProgressBtn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 hidden">
+                        Save Progress
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white p-6 mt-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 Learning Journey | A personalized learning path platform</p>
+        </div>
+    </footer>
+    
+    <script>
+        // API Base URL - change this to your actual API endpoint
+        const API_BASE_URL = 'http://127.0.0.1:8080/api';
+        
+        // DOM Elements
+        const careerInput = document.getElementById('career');
+        const numPointsInput = document.getElementById('numPoints');
+        const pathBtn = document.getElementById('pathBtn');
+        const pathResults = document.getElementById('pathResults');
+        const pathLoader = document.getElementById('pathLoader');
+        const learningPath = document.getElementById('learningPath');
+        const completedCount = document.getElementById('completedCount');
+        const totalStages = document.getElementById('totalStages');
+        const progressBar = document.getElementById('progressBar');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveProgressBtn = document.getElementById('saveProgressBtn');
+        
+        // Track completed stages
+        let stages = [];
+        let completed = [];
+        
+        // Initialize the app
+        function initApp() {
+            // Set up button event listeners
+            pathBtn.addEventListener('click', generateLearningPath);
+            resetBtn.addEventListener('click', resetProgress);
+            saveProgressBtn.addEventListener('click', saveProgress);
+            
+            // Load saved progress if available
+            loadProgress();
+        }
+        
+        // Generate learning path
+        async function generateLearningPath() {
+            const career = careerInput.value.trim();
+            const numPoints = numPointsInput.value;
+            
+            if (!career) {
+                alert('Please enter a career goal');
+                return;
+            }
+            
+            pathLoader.classList.remove('hidden');
+            pathResults.classList.remove('hidden');
+            learningPath.innerHTML = '';
+            resetBtn.classList.add('hidden');
+            saveProgressBtn.classList.add('hidden');
+            
+            try {
+                const response = await axios.get(`${API_BASE_URL}/learning-path?career=${encodeURIComponent(career)}&num_points=${numPoints}`);
+                const data = response.data;
+                
+                pathLoader.classList.add('hidden');
+                
+                if (!data.learning_path || data.learning_path.length === 0) {
+                    learningPath.innerHTML = '<p class="text-gray-500">No learning path could be generated. Please try a different career goal.</p>';
+                    return;
+                }
+                
+                // Reset stages
+                stages = data.learning_path;
+                completed = new Array(stages.length).fill(false);
+                
+                // Update total count
+                totalStages.textContent = stages.length;
+                completedCount.textContent = '0';
+                updateProgressBar();
+                
+                // Create a visual representation of the learning path with stages
+                renderLearningPath();
+                
+                resetBtn.classList.remove('hidden');
+                saveProgressBtn.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error generating learning path:', error);
+                pathLoader.classList.add('hidden');
+                learningPath.innerHTML = '<p class="text-red-500">Failed to generate learning path. Please try again.</p>';
+            }
+        }
+        
+        // Render the learning path based on current state
+        function renderLearningPath() {
+            learningPath.innerHTML = '';
+            
+            // Create a visual representation of the learning path with stages
+            stages.forEach((point, index) => {
+                const stageDiv = document.createElement('div');
+                stageDiv.className = `path-stage flex mb-4 ${completed[index] ? 'completed-stage' : ''}`;
+                stageDiv.dataset.index = index;
+                
+                // Generate a color for the stage circle
+                const colors = ['bg-blue-500', 'bg-blue-600', 'bg-blue-700', 'bg-indigo-500', 'bg-indigo-600'];
+                const randomColor = colors[index % colors.length];
+                
+                // Determine if this stage is locked
+                // A stage is available if all previous stages are completed
+                // or if it's the first stage (index 0)
+                const isAvailable = index === 0 || 
+                    completed.slice(0, index).every(status => status === true);
+                
+                stageDiv.innerHTML = `
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="stage-number flex items-center justify-center w-12 h-12 ${randomColor} text-white rounded-full font-bold">
+                            ${completed[index] ? 
+                                `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>` : 
+                                (index + 1)
+                            }
+                        </div>
+                    </div>
+                    <div class="stage-content bg-white p-4 rounded-lg shadow border border-gray-200 flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-semibold text-gray-800">Stage ${index + 1}</h4>
+                            <div class="flex items-center">
+                                ${!isAvailable && !completed[index] ? 
+                                    `<span class="text-xs text-gray-500 mr-2">Complete previous stages first</span>` : 
+                                    ''
+                                }
+                                <label class="inline-flex items-center cursor-pointer ${!isAvailable ? 'locked-stage' : ''}">
+                                    <input type="checkbox" class="stage-checkbox w-4 h-4 text-green-600 rounded focus:ring-green-500" 
+                                        ${completed[index] ? 'checked' : ''}
+                                        ${!isAvailable ? 'disabled' : ''}>
+                                    <span class="ml-2 text-sm text-gray-600">Completed</span>
+                                </label>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mt-1">${point}</p>
+                    </div>
+                `;
+                
+                learningPath.appendChild(stageDiv);
+                
+                // Add click handler for checkbox only if the stage is available
+                const checkbox = stageDiv.querySelector('.stage-checkbox');
+                if (isAvailable) {
+                    checkbox.addEventListener('change', function() {
+                        toggleStageCompletion(index, this.checked);
+                    });
+                }
+            });
+            
+            // Add a completion marker at the end if all stages are completed
+            if (completed.every(status => status)) {
+                const completionDiv = document.createElement('div');
+                completionDiv.className = 'path-stage flex';
+                completionDiv.innerHTML = `
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="stage-number flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg shadow border border-green-200 flex-grow">
+                        <h4 class="font-semibold text-green-800">Career Ready!</h4>
+                        <p class="text-green-700 mt-1">Congratulations! You've completed the learning path for ${careerInput.value}</p>
+                    </div>
+                `;
+                
+                learningPath.appendChild(completionDiv);
+            }
+        }
+        
+        // Toggle the completion state of a stage
+        function toggleStageCompletion(index, isCompleted) {
+            // If marking as complete, ensure there are no gaps
+            if (isCompleted) {
+                // Check if all previous stages are completed
+                const allPreviousCompleted = index === 0 || 
+                    completed.slice(0, index).every(status => status === true);
+                
+                if (!allPreviousCompleted) {
+                    alert('Please complete previous stages first!');
+                    // Reset the checkbox
+                    const checkbox = learningPath.querySelector(`.path-stage[data-index="${index}"] .stage-checkbox`);
+                    checkbox.checked = false;
+                    return;
+                }
+                
+                completed[index] = true;
+            } else {
+                // When unchecking, ensure no subsequent stages are completed
+                const anySubsequentCompleted = completed.slice(index + 1).some(status => status === true);
+                
+                if (anySubsequentCompleted) {
+                    alert('You must uncheck later stages first!');
+                    // Reset the checkbox
+                    const checkbox = learningPath.querySelector(`.path-stage[data-index="${index}"] .stage-checkbox`);
+                    checkbox.checked = true;
+                    return;
+                }
+                
+                completed[index] = false;
+            }
+            
+            // Re-render the entire path to update locked/unlocked states
+            renderLearningPath();
+            
+            // Update completion count and progress bar
+            const completionCount = completed.filter(status => status).length;
+            completedCount.textContent = completionCount;
+            updateProgressBar();
+        }
+        
+        // Update the progress bar based on completion status
+        function updateProgressBar() {
+            const completionCount = completed.filter(status => status).length;
+            const percentage = stages.length > 0 ? (completionCount / stages.length) * 100 : 0;
+            progressBar.style.width = `${percentage}%`;
+        }
+        
+        // Reset all progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset your progress?')) {
+                completed = new Array(stages.length).fill(false);
+                completedCount.textContent = '0';
+                updateProgressBar();
+                renderLearningPath();
+                
+                // Clear local storage
+                localStorage.removeItem('learningPathData');
+            }
+        }
+        
+        // Save progress to local storage
+        function saveProgress() {
+            const data = {
+                career: careerInput.value,
+                numPoints: numPointsInput.value,
+                stages: stages,
+                completed: completed
+            };
+            
+            localStorage.setItem('learningPathData', JSON.stringify(data));
+            alert('Progress saved successfully!');
+        }
+        
+        // Load progress from local storage
+        function loadProgress() {
+            const savedData = localStorage.getItem('learningPathData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                // Restore values
+                careerInput.value = data.career;
+                numPointsInput.value = data.numPoints;
+                stages = data.stages;
+                completed = data.completed;
+                
+                // Update UI
+                pathResults.classList.remove('hidden');
+                totalStages.textContent = stages.length;
+                completedCount.textContent = completed.filter(status => status).length;
+                updateProgressBar();
+                renderLearningPath();
+                
+                resetBtn.classList.remove('hidden');
+                saveProgressBtn.classList.remove('hidden');
+            }
+        }
+        
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

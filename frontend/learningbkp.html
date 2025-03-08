@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Path & Course Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <style>
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .path-stage {
+            position: relative;
+        }
+        
+        .path-stage:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 2.5rem;
+            left: 1.5rem;
+            height: calc(100% - 1rem);
+            width: 2px;
+            background-color: #3B82F6;
+            z-index: 1;
+        }
+        
+        .stage-number {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 text-white p-6 shadow-md">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold">Learning Journey</h1>
+            <p class="mt-2">Personalized course recommendations and learning paths</p>
+        </div>
+    </header>
+    
+    <main class="container mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Course Recommendations Section -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Course Recommendations</h2>
+                
+                <div class="mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Level Selection -->
+                        <div>
+                            <label for="level" class="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                            <select id="level" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Level</option>
+                                <!-- Will be populated via API -->
+                            </select>
+                        </div>
+                        
+                        <!-- Subject Selection -->
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                            <input type="text" id="subjectSearch" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Search subjects...">
+                            <div id="subjectResults" class="hidden absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-md overflow-auto max-h-60"></div>
+                            <input type="hidden" id="subject">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button id="recommendBtn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:bg-gray-400" disabled>
+                            Get Recommendations
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="courseResults" class="hidden">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Recommended Courses</h3>
+                    <div id="courseLoader" class="loader hidden"></div>
+                    <div id="coursesList" class="space-y-4">
+                        <!-- Course recommendations will appear here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Learning Path Section -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Career Learning Path</h2>
+                
+                <div class="mb-6">
+                    <label for="career" class="block text-sm font-medium text-gray-700 mb-2">Career Goal</label>
+                    <input type="text" id="career" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Machine Learning Engineer">
+                    
+                    <div class="mt-4">
+                        <label for="numPoints" class="block text-sm font-medium text-gray-700 mb-2">Number of Learning Points</label>
+                        <input type="number" id="numPoints" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="10" min="5" max="20">
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button id="pathBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:bg-gray-400">
+                            Generate Learning Path
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="pathResults" class="hidden">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Your Learning Path</h3>
+                    <div id="pathLoader" class="loader hidden"></div>
+                    <div id="learningPath" class="space-y-1 mt-6 max-h-96 overflow-y-auto pr-2">
+                        <!-- Learning path stages will appear here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="bg-gray-800 text-white p-6 mt-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 Learning Journey | A personalized learning recommendation platform</p>
+        </div>
+    </footer>
+    
+    <script>
+        // API Base URL - change this to your actual API endpoint
+        const API_BASE_URL = 'http://127.0.0.1:8080/api';
+        
+        // DOM Elements
+        const levelSelect = document.getElementById('level');
+        const subjectSearch = document.getElementById('subjectSearch');
+        const subjectResults = document.getElementById('subjectResults');
+        const subjectInput = document.getElementById('subject');
+        const recommendBtn = document.getElementById('recommendBtn');
+        const courseResults = document.getElementById('courseResults');
+        const courseLoader = document.getElementById('courseLoader');
+        const coursesList = document.getElementById('coursesList');
+        
+        const careerInput = document.getElementById('career');
+        const numPointsInput = document.getElementById('numPoints');
+        const pathBtn = document.getElementById('pathBtn');
+        const pathResults = document.getElementById('pathResults');
+        const pathLoader = document.getElementById('pathLoader');
+        const learningPath = document.getElementById('learningPath');
+        
+        // Initialize the app
+        async function initApp() {
+            try {
+                // Load course levels
+                const levelsResponse = await axios.get(`${API_BASE_URL}/courses/levels`);
+                const levels = levelsResponse.data.levels;
+                
+                levels.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level;
+                    option.textContent = level;
+                    levelSelect.appendChild(option);
+                });
+                
+                // Set up subject search
+                setupSubjectSearch();
+                
+                // Enable/disable the recommend button based on form values
+                levelSelect.addEventListener('change', validateRecommendForm);
+                subjectInput.addEventListener('change', validateRecommendForm);
+                
+                // Set up button event listeners
+                recommendBtn.addEventListener('click', getCourseRecommendations);
+                pathBtn.addEventListener('click', generateLearningPath);
+                
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                alert('Failed to initialize the application. Please try again later.');
+            }
+        }
+        
+        // Subject search functionality
+        function setupSubjectSearch() {
+            let debounceTimer;
+            
+            subjectSearch.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    subjectResults.classList.add('hidden');
+                    return;
+                }
+                
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const response = await axios.get(`${API_BASE_URL}/courses/search_subject?query=${encodeURIComponent(query)}`);
+                        const subjects = response.data;
+                        
+                        subjectResults.innerHTML = '';
+                        
+                        if (subjects.length === 0) {
+                            subjectResults.innerHTML = '<div class="p-2 text-gray-500">No subjects found</div>';
+                        } else {
+                            subjects.forEach(subject => {
+                                const div = document.createElement('div');
+                                div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                                div.textContent = subject;
+                                div.addEventListener('click', () => {
+                                    subjectSearch.value = subject;
+                                    subjectInput.value = subject;
+                                    subjectResults.classList.add('hidden');
+                                    validateRecommendForm();
+                                });
+                                subjectResults.appendChild(div);
+                            });
+                        }
+                        
+                        subjectResults.classList.remove('hidden');
+                    } catch (error) {
+                        console.error('Error searching subjects:', error);
+                    }
+                }, 300);
+            });
+            
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== subjectSearch && e.target !== subjectResults) {
+                    subjectResults.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Validate the recommendation form
+        function validateRecommendForm() {
+            if (levelSelect.value && subjectInput.value) {
+                recommendBtn.disabled = false;
+            } else {
+                recommendBtn.disabled = true;
+            }
+        }
+        
+        // Get course recommendations
+        async function getCourseRecommendations() {
+            const level = levelSelect.value;
+            const subject = subjectInput.value || subjectSearch.value;
+            
+            courseLoader.classList.remove('hidden');
+            courseResults.classList.remove('hidden');
+            coursesList.innerHTML = '';
+            
+            try {
+                const response = await axios.get(`${API_BASE_URL}/courses/recommend?level=${encodeURIComponent(level)}&subject=${encodeURIComponent(subject)}&limit=5`);
+                const data = response.data;
+                
+                courseLoader.classList.add('hidden');
+                
+                if (data.count === 0) {
+                    coursesList.innerHTML = '<p class="text-gray-500">No courses found for the selected criteria.</p>';
+                    return;
+                }
+                
+                data.recommendations.forEach(course => {
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'bg-gray-50 p-4 rounded-md border border-gray-200';
+                    
+                    courseCard.innerHTML = `
+                        <h4 class="font-bold text-blue-700">${course.course_title}</h4>
+                        <div class="text-sm text-gray-600 mt-1">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-sm">${course.level}</span>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-sm">${course.subject}</span>
+                        </div>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span class="font-semibold">$${course.price.toFixed(2)}</span>
+                            <span class="text-sm text-gray-600">${course.num_subscribers.toLocaleString()} students</span>
+                        </div>
+                        ${course.url ? `<a href="${course.url}" target="_blank" class="block mt-2 text-center bg-blue-600 text-white py-1 px-4 rounded-md hover:bg-blue-700 text-sm">View Course</a>` : ''}
+                    `;
+                    
+                    coursesList.appendChild(courseCard);
+                });
+                
+            } catch (error) {
+                console.error('Error getting recommendations:', error);
+                courseLoader.classList.add('hidden');
+                coursesList.innerHTML = '<p class="text-red-500">Failed to fetch course recommendations. Please try again.</p>';
+            }
+        }
+        
+        // Generate learning path
+        async function generateLearningPath() {
+            const career = careerInput.value.trim();
+            const numPoints = numPointsInput.value;
+            
+            if (!career) {
+                alert('Please enter a career goal');
+                return;
+            }
+            
+            pathLoader.classList.remove('hidden');
+            pathResults.classList.remove('hidden');
+            learningPath.innerHTML = '';
+            
+            try {
+                const response = await axios.get(`${API_BASE_URL}/learning-path?career=${encodeURIComponent(career)}&num_points=${numPoints}`);
+                const data = response.data;
+                
+                pathLoader.classList.add('hidden');
+                
+                if (!data.learning_path || data.learning_path.length === 0) {
+                    learningPath.innerHTML = '<p class="text-gray-500">No learning path could be generated. Please try a different career goal.</p>';
+                    return;
+                }
+                
+                // Create a visual representation of the learning path with stages
+                data.learning_path.forEach((point, index) => {
+                    const stageDiv = document.createElement('div');
+                    stageDiv.className = 'path-stage flex mb-4';
+                    
+                    // Generate a random color shade for the stage circle (blues and greens)
+                    const colors = ['bg-blue-500', 'bg-blue-600', 'bg-blue-700', 'bg-green-500', 'bg-green-600', 'bg-teal-600'];
+                    const randomColor = colors[index % colors.length];
+                    
+                    stageDiv.innerHTML = `
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="stage-number flex items-center justify-center w-12 h-12 ${randomColor} text-white rounded-full font-bold">
+                                ${index + 1}
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex-grow">
+                            <h4 class="font-semibold text-gray-800">Stage ${index + 1}</h4>
+                            <p class="text-gray-600 mt-1">${point}</p>
+                        </div>
+                    `;
+                    
+                    learningPath.appendChild(stageDiv);
+                });
+                
+                // Add a completion marker at the end
+                const completionDiv = document.createElement('div');
+                completionDiv.className = 'path-stage flex';
+                completionDiv.innerHTML = `
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="stage-number flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg shadow border border-green-200 flex-grow">
+                        <h4 class="font-semibold text-green-800">Career Ready!</h4>
+                        <p class="text-green-700 mt-1">You've completed the learning path for ${career}</p>
+                    </div>
+                `;
+                
+                learningPath.appendChild(completionDiv);
+                
+            } catch (error) {
+                console.error('Error generating learning path:', error);
+                pathLoader.classList.add('hidden');
+                learningPath.innerHTML = '<p class="text-red-500">Failed to generate learning path. Please try again.</p>';
+            }
+        }
+        
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

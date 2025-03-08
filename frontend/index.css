@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
+
+body {
+    background: #F8F8F8;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.custom-field {
+    position: relative;
+    font-size: 160%; 
+    padding-top: 2%; 
+    margin-top: 6%; 
+    width: 60%;
+   
+}
+
+.custom-field input {
+    width: 100%; 
+    font-size: auto;
+    border-radius: 0.3vw;
+    border: 0.15vw solid gray;
+    outline-color: deepskyblue;
+    height: 3vw;
+    padding: 1vw; 
+    background-color:rgb(205, 199, 192);
+    
+}
+
+.custom-field .placeholder {
+    position: absolute;
+    left: 1.2%;
+    top: calc(50% + 0.5%); 
+    transform: translateY(-50%);
+    color: #000000;
+    transition: top 0.3s ease, font-size 0.3s ease, color 0.3s ease;
+    font-size: 80%;
+    margin-left: 5%;
+}
+
+.custom-field input:valid + .placeholder,
+.custom-field input:focus + .placeholder {
+    top: 2.1%; 
+    font-size: 60%;
+    color: #222;
+    padding: 0.5%;
+    background: white;
+}
+
+.message {
+    font-size: 7%; 
+    font-family: 'Ubuntu', sans-serif;
+    color: steelblue;
+}
+
+.success {
+    font-size: 1.8vw; 
+    margin-top: 1.5%; 
+    color: seagreen;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

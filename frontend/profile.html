@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    
+    <link href="\dist\styles.css" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-image: url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-gray-100">
+    <!-- Loading Spinner (hidden by default) -->
+    <div id="loading-screen" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-50">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="mt-4 text-gray-300">Loading profile...</p>
+        </div>
+    </div>
+
+    <!-- Main Content (hidden during loading) -->
+    <div id="main-content" class="py-12 px-4 sm:px-6 lg:px-8 hidden">
+        <div class="max-w-md mx-auto glass-effect rounded-xl shadow-lg overflow-hidden md:max-w-2xl transition-all duration-300 ease-in-out border border-slate-700">
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h1 class="text-2xl font-medium text-gray-100">Profile</h1>
+                    <button id="edit-button" class="text-purple-400 flex items-center hover:scale-105 active:scale-95 transition-transform">
+                        <span id="edit-icon" class="mr-1"></span>
+                        <span id="edit-text">Edit</span>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col items-center mb-8">
+                    <div class="relative">
+                        <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-700 shadow-lg transition-transform duration-300 opacity-0 scale-90" id="profile-image-container">
+                            <img id="profile-image" src="/api/placeholder/150/150" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        <div id="camera-button" class="absolute bottom-0 right-0 bg-purple-500 p-2 rounded-full text-white cursor-pointer shadow-lg hidden opacity-0">
+                            <span id="camera-icon"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Name -->
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-slate-700 p-2 rounded-full text-purple-400 hover:rotate-12 transition-transform duration-300" id="user-icon-container">
+                            <span id="user-icon"></span>
+                        </div>
+                        <div id="name-display" class="font-medium text-gray-100">User Name</div>
+                        <input id="name-input" type="text" class="flex-1 p-2 border border-slate-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none hidden bg-slate-800 text-gray-100" value="User Name">
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-slate-700 p-2 rounded-full text-purple-400 hover:rotate-12 transition-transform duration-300" id="mail-icon-container">
+                            <span id="mail-icon"></span>
+                        </div>
+                        <div id="email-display" class="font-medium text-gray-100">user@example.com</div>
+                    </div>
+                    
+                    <!-- Location (new) -->
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-slate-700 p-2 rounded-full text-purple-400 hover:rotate-12 transition-transform duration-300" id="map-icon-container">
+                            <span id="map-icon"></span>
+                        </div>
+                        <div id="location-display" class="font-medium text-gray-100">San Francisco, CA</div>
+                        <input id="location-input" type="text" class="flex-1 p-2 border border-slate-600 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none hidden bg-slate-800 text-gray-100" value="San Francisco, CA">
+                    </div>
+                    
+                    <!-- Password -->
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-slate-700 p-2 rounded-full text-purple-400 hover:rotate-12 transition-transform duration-300" id="key-icon-container">
+                            <span id="key-icon"></span>
+                        </div>
+                        <div class="font-medium text-gray-400">••••••••••</div>
+                        <button id="change-password-button" class="text-sm text-purple-400 hidden">Change password</button>
+                    </div>
+                    
+                    <!-- Skills (formerly Interests) -->
+                    <div class="pt-4">
+                        <div class="flex items-center space-x-4 mb-3">
+                            <div class="bg-slate-700 p-2 rounded-full text-purple-400 hover:rotate-12 transition-transform duration-300" id="code-icon-container">
+                                <span id="code-icon"></span>
+                            </div>
+                            <div class="font-medium text-gray-100">Skills</div>
+                        </div>
+                        
+                        <div class="ml-12">
+                            <div id="skills-display" class="flex flex-wrap gap-2">
+                                <!-- Skills will be inserted here by JavaScript -->
+                            </div>
+                            
+                            <div id="skills-edit" class="flex flex-wrap gap-2 hidden">
+                                <!-- Editable skills will be inserted here by JavaScript -->
+                                <button id="add-skill-button" class="px-3 py-1 border border-dashed border-slate-600 rounded-full text-sm text-gray-400 hover:border-purple-400 hover:text-purple-300">
+                                    + Add skill
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="save-button-container" class="mt-8 flex justify-end hidden">
+                    <button id="save-button" class="bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 transition-colors hover:scale-105 active:scale-95">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mock user data - replace with your actual data source
+        const userData = {
+            name: "Jane Doe",
+            email: "jane.doe@example.com",
+            location: "San Francisco, CA",
+            photoURL: "/api/placeholder/150/150",
+            skills: ["JavaScript", "HTML/CSS", "React", "Node.js", "UI/UX Design"]
+        };
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const editButton = document.getElementById('edit-button');
+        const editText = document.getElementById('edit-text');
+        const nameDisplay = document.getElementById('name-display');
+        const nameInput = document.getElementById('name-input');
+        const emailDisplay = document.getElementById('email-display');
+        const locationDisplay = document.getElementById('location-display');
+        const locationInput = document.getElementById('location-input');
+        const profileImage = document.getElementById('profile-image');
+        const profileImageContainer = document.getElementById('profile-image-container');
+        const cameraButton = document.getElementById('camera-button');
+        const skillsDisplay = document.getElementById('skills-display');
+        const skillsEdit = document.getElementById('skills-edit');
+        const saveButtonContainer = document.getElementById('save-button-container');
+        const saveButton = document.getElementById('save-button');
+        const changePasswordButton = document.getElementById('change-password-button');
+        const addSkillButton = document.getElementById('add-skill-button');
+
+        // Add Lucide icons
+        document.getElementById('edit-icon').innerHTML = '<i data-lucide="edit" size="18"></i>';
+        document.getElementById('camera-icon').innerHTML = '<i data-lucide="camera" size="20"></i>';
+        document.getElementById('user-icon').innerHTML = '<i data-lucide="user" size="20"></i>';
+        document.getElementById('mail-icon').innerHTML = '<i data-lucide="mail" size="20"></i>';
+        document.getElementById('map-icon').innerHTML = '<i data-lucide="map-pin" size="20"></i>';
+        document.getElementById('key-icon').innerHTML = '<i data-lucide="key" size="20"></i>';
+        document.getElementById('code-icon').innerHTML = '<i data-lucide="code-2" size="20"></i>';
+
+        // Function to toggle edit mode
+        let isEditing = false;
+        function toggleEditMode() {
+            isEditing = !isEditing;
+            
+            if (isEditing) {
+                // Switch to edit mode
+                editText.textContent = 'Cancel';
+                nameDisplay.classList.add('hidden');
+                nameInput.classList.remove('hidden');
+                nameInput.value = nameDisplay.textContent;
+                locationDisplay.classList.add('hidden');
+                locationInput.classList.remove('hidden');
+                locationInput.value = locationDisplay.textContent;
+                skillsDisplay.classList.add('hidden');
+                skillsEdit.classList.remove('hidden');
+                saveButtonContainer.classList.remove('hidden');
+                changePasswordButton.classList.remove('hidden');
+                cameraButton.classList.remove('hidden');
+                
+                // Animate camera button
+                setTimeout(() => {
+                    cameraButton.classList.add('opacity-100');
+                }, 50);
+            } else {
+                // Switch back to display mode
+                editText.textContent = 'Edit';
+                nameDisplay.classList.remove('hidden');
+                nameInput.classList.add('hidden');
+                locationDisplay.classList.remove('hidden');
+                locationInput.classList.add('hidden');
+                skillsDisplay.classList.remove('hidden');
+                skillsEdit.classList.add('hidden');
+                saveButtonContainer.classList.add('hidden');
+                changePasswordButton.classList.add('hidden');
+                cameraButton.classList.add('opacity-0');
+                
+                // Hide camera button after fade
+                setTimeout(() => {
+                    cameraButton.classList.add('hidden');
+                }, 300);
+            }
+            
+            // Re-initialize icons
+            lucide.createIcons();
+        }
+
+        // Function to render skills
+        function renderSkills() {
+            // Clear current skills
+            skillsDisplay.innerHTML = '';
+            skillsEdit.innerHTML = '';
+            
+            if (userData.skills && userData.skills.length > 0) {
+                // Render display skills
+                userData.skills.forEach((skill, index) => {
+                    const skillElement = document.createElement('div');
+                    skillElement.className = 'bg-slate-700 px-3 py-1 rounded-full text-sm text-purple-300 opacity-0 scale-90';
+                    skillElement.textContent = skill;
+                    skillsDisplay.appendChild(skillElement);
+                    
+                    // Animate appearance
+                    setTimeout(() => {
+                        skillElement.classList.add('transition-all', 'duration-300', 'ease-in-out', 'opacity-100', 'scale-100');
+                    }, index * 100);
+                    
+                    // Render editable skills
+                    const editableSkill = document.createElement('div');
+                    editableSkill.className = 'bg-slate-700 px-3 py-1 rounded-full text-sm text-purple-300 flex items-center';
+                    editableSkill.innerHTML = `
+                        ${skill}
+                        <button class="ml-2 text-gray-400 hover:text-red-400" data-index="${index}">×</button>
+                    `;
+                    skillsEdit.appendChild(editableSkill);
+                    
+                    // Add click handler for remove button
+                    const removeButton = editableSkill.querySelector('button');
+                    removeButton.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        userData.skills.splice(index, 1);
+                        renderSkills();
+                    });
+                });
+            } else {
+                // No skills message
+                const noSkillsMessage = document.createElement('p');
+                noSkillsMessage.className = 'text-gray-400 text-sm';
+                noSkillsMessage.textContent = 'No skills added yet';
+                skillsDisplay.appendChild(noSkillsMessage);
+            }
+            
+            // Add the "Add skill" button back
+            skillsEdit.appendChild(addSkillButton);
+        }
+
+        // Function to initialize page with user data
+        function initializeUserData() {
+            nameDisplay.textContent = userData.name;
+            nameInput.value = userData.name;
+            emailDisplay.textContent = userData.email;
+            locationDisplay.textContent = userData.location;
+            locationInput.value = userData.location;
+            profileImage.src = userData.photoURL;
+            renderSkills();
+            
+            // Animate profile picture
+            setTimeout(() => {
+                profileImageContainer.classList.remove('opacity-0', 'scale-90');
+                profileImageContainer.classList.add('opacity-100', 'scale-100');
+            }, 100);
+        }
+
+        // Function to save changes
+        function saveChanges() {
+            // Update user data from form values
+            userData.name = nameInput.value;
+            userData.location = locationInput.value;
+            
+            // Update UI
+            nameDisplay.textContent = userData.name;
+            locationDisplay.textContent = userData.location;
+            
+            // Exit edit mode
+            toggleEditMode();
+            
+            // In a real app, you would save to your backend here
+            console.log("Saving user data:", userData);
+        }
+
+        // Function to add a new skill
+        function addNewSkill() {
+            const newSkill = prompt("Enter a new skill:");
+            if (newSkill && newSkill.trim() !== '') {
+                userData.skills.push(newSkill.trim());
+                renderSkills();
+            }
+        }
+
+        // Event listeners
+        editButton.addEventListener('click', toggleEditMode);
+        saveButton.addEventListener('click', saveChanges);
+        addSkillButton.addEventListener('click', addNewSkill);
+        cameraButton.addEventListener('click', () => {
+            alert("In a real app, this would open a file picker to change your profile picture.");
+        });
+        changePasswordButton.addEventListener('click', () => {
+            alert("In a real app, this would open a dialog to change your password.");
+        });
+
+        // Simulate loading
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize Lucide icons
+            lucide.createIcons();
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                initializeUserData();
+            }, 1500);
+        });
+
+        // Icon hover animations
+        const iconContainers = [
+            document.getElementById('user-icon-container'),
+            document.getElementById('mail-icon-container'),
+            document.getElementById('map-icon-container'),
+            document.getElementById('key-icon-container'),
+            document.getElementById('code-icon-container')
+        ];
+
+        iconContainers.forEach(container => {
+            container.addEventListener('mouseenter', () => {
+                container.classList.add('rotate-12');
+            });
+            
+            container.addEventListener('mouseleave', () => {
+                container.classList.remove('rotate-12');
+            });
+        });
+    </script>
+</body>
+</html>
