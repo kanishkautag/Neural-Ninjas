@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Resume Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .upload-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .results-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            margin: 10px 0;
+            text-align: center;
+            cursor: pointer;
+            padding: 15px;
+            border: 2px dashed #007bff;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover {
+            background-color: #f1f8ff;
+        }
+        .file-upload-input {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            width: 100%;
+            height: 100%;
+        }
+        .spinner-container {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .text-area {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+        .analysis-result {
+            white-space: pre-line;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        /* Fix for overlapping sections */
+        .analysis-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        .analysis-section h4 {
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .analysis-content {
+            padding-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="app-header">
+            <h1><i class="fas fa-file-alt"></i> AI-Powered Resume Analysis</h1>
+            <p>Upload your resume to get instant feedback and improve your job application</p>
+        </div>
+
+        <div class="upload-section">
+            <h2><i class="fas fa-upload"></i> Upload Your Resume</h2>
+            <div class="file-upload">
+                <div id="upload-label">
+                    <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                    <p>Drag & drop your resume (PDF only) or click to browse</p>
+                    <p id="file-name">No file selected</p>
+                </div>
+                <input type="file" class="file-upload-input" id="resume-upload" accept=".pdf">
+            </div>
+            <div class="text-center mt-3">
+                <button id="analyze-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-robot"></i> Analyze Resume
+                </button>
+            </div>
+        </div>
+
+        <div class="spinner-container" id="spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Analyzing your resume... Please wait.</p>
+        </div>
+
+        <div class="results-section" id="results">
+            <h2><i class="fas fa-chart-bar"></i> Analysis Results</h2>
+            
+            <div class="mb-4">
+                <h3><i class="fas fa-file-alt"></i> Extracted Text</h3>
+                <div class="text-area" id="extracted-text"></div>
+            </div>
+            
+            <div class="mb-4">
+                <h3><i class="fas fa-clipboard-check"></i> Resume Feedback</h3>
+                <div class="analysis-result" id="analysis-result"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Resume Analyzer | Powered by FastAPI and Ollama</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUpload = document.getElementById('resume-upload');
+            const fileNameDisplay = document.getElementById('file-name');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const spinner = document.getElementById('spinner');
+            const resultsSection = document.getElementById('results');
+            const extractedText = document.getElementById('extracted-text');
+            const analysisResult = document.getElementById('analysis-result');
+
+            fileUpload.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const fileName = this.files[0].name;
+                    fileNameDisplay.textContent = fileName;
+                    
+                    if (fileName.toLowerCase().endsWith('.pdf')) {
+                        analyzeBtn.disabled = false;
+                    } else {
+                        fileNameDisplay.textContent = 'Please select a PDF file';
+                        analyzeBtn.disabled = true;
+                    }
+                }
+            });
+
+            analyzeBtn.addEventListener('click', function() {
+                if (!fileUpload.files || !fileUpload.files[0]) return;
+
+                // Show spinner, hide results
+                spinner.style.display = 'block';
+                resultsSection.style.display = 'none';
+
+                const formData = new FormData();
+                formData.append('file', fileUpload.files[0]);
+
+                fetch('/analyze-resume', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide spinner
+                    spinner.style.display = 'none';
+                    
+                    if (data.success) {
+                        // Show results
+                        resultsSection.style.display = 'block';
+                        
+                        // Fill in the results
+                        extractedText.textContent = data.extracted_text || 'No text extracted';
+                        analysisResult.innerHTML = formatAnalysis(data.analysis || 'No analysis available');
+                        
+                        // Scroll to results
+                        resultsSection.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    spinner.style.display = 'none';
+                    alert('Error: ' + error.message);
+                });
+            });
+
+            function formatAnalysis(text) {
+                // Improved formatting to prevent overlapping
+                let formattedText = text;
+                
+                // Replace section headers with styled divs
+                formattedText = formattedText
+                    .replace(/1️⃣(.*?)(?=2️⃣|3️⃣|4️⃣|$)/s, '<div class="analysis-section"><h4><i class="fas fa-check-circle text-success"></i> Strengths:</h4><div class="analysis-content">$1</div></div>')
+                    .replace(/2️⃣(.*?)(?=3️⃣|4️⃣|$)/s, '<div class="analysis-section"><h4><i class="fas fa-exclamation-triangle text-warning"></i> Areas for Improvement:</h4><div class="analysis-content">$1</div></div>')
+                    .replace(/3️⃣(.*?)(?=4️⃣|$)/s, '<div class="analysis-section"><h4><i class="fas fa-lightbulb text-primary"></i> ATS-Friendly Suggestions:</h4><div class="analysis-content">$1</div></div>')
+                    .replace(/4️⃣(.*)/s, '<div class="analysis-section"><h4><i class="fas fa-star text-info"></i> Score:</h4><div class="analysis-content">$1</div></div>');
+                
+                // Convert line breaks to <br> tags within each section
+                formattedText = formattedText.replace(/\n/g, '<br>');
+                
+                return formattedText;
+            }
+        });
+    </script>
+</body>
+</html>

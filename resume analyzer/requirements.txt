@@ -1,0 +1,6 @@
+fastapi==0.100.0
+uvicorn==0.22.0
+python-multipart==0.0.6
+pymupdf==1.22.5
+ollama==0.1.5
+pydantic==2.0.3
