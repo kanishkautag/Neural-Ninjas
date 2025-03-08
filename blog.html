@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechFinance Pulse | Live Tech & Finance News</title>
+  <link rel="stylesheet" href="./output.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <style>
+    .article-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .article-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .loader {
+      border-top-color: #6366F1;
+      animation: spinner 1.5s linear infinite;
+    }
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="app">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex">
+            <div class="flex-shrink-0 flex items-center">
+              <span class="text-2xl font-bold text-indigo-600">TechFinance Pulse</span>
+            </div>
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                Home
+              </a>
+              <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                Tech News
+              </a>
+              <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                Finance
+              </a>
+            </div>
+          </div>
+          <div class="hidden sm:ml-6 sm:flex sm:items-center">
+            <button id="refresh-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Refresh News
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative bg-indigo-800">
+      <div class="absolute inset-0">
+        <img class="w-full h-full object-cover" src="/api/placeholder/1200/350" alt="Tech and Finance">
+        <div class="absolute inset-0 bg-indigo-800 opacity-70"></div>
+      </div>
+      <div class="relative max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">TechFinance Pulse</h1>
+        <p class="mt-6 max-w-3xl text-xl text-indigo-100">Live updates and breaking news from the worlds of technology and finance.</p>
+        <div class="mt-8 max-w-md">
+          <div class="rounded-md shadow">
+            <a href="#news-section" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+              Latest News
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div id="news-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+      <div class="flex justify-between items-center pb-5 border-b border-gray-200">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">Latest News</h2>
+        <div class="flex space-x-2">
+          <button 
+            id="filter-all" 
+            class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-indigo-600 text-white"
+          >
+            All
+          </button>
+          <button 
+            id="filter-tech" 
+            class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-white text-gray-700 hover:bg-gray-50"
+          >
+            Technology
+          </button>
+          <button 
+            id="filter-finance" 
+            class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 bg-white text-gray-700 hover:bg-gray-50"
+          >
+            Finance
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
+      <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+    </div>
+    
+    <!-- Error Message -->
+    <div id="error-message" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+      <div class="bg-red-50 border-l-4 border-red-400 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-red-700">
+              Unable to load news. Please try again later or check your connection.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Articles Grid -->
+    <div id="articles-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+      <div id="articles-grid" class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Articles will be inserted here by JavaScript -->
+      </div>
+      
+      <!-- Load More Button -->
+      <div class="mt-12 text-center">
+        <button id="load-more" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Load More
+        </button>
+      </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="bg-indigo-700">
+      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center">
+        <div class="lg:w-0 lg:flex-1">
+          <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Stay up to date
+          </h2>
+          <p class="mt-3 max-w-3xl text-lg text-indigo-200">
+            Get the latest news and analysis delivered to your inbox daily.
+          </p>
+        </div>
+        <div class="mt-8 lg:mt-0 lg:ml-8">
+          <form class="sm:flex">
+            <label for="email-address" class="sr-only">Email address</label>
+            <input id="email-address" name="email" type="email" autocomplete="email" required class="w-full px-5 py-3 border border-transparent placeholder-gray-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-700 focus:ring-white focus:border-white sm:max-w-xs rounded-md" placeholder="Enter your email">
+            <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3 sm:flex-shrink-0">
+              <button type="submit" class="w-full flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-700 focus:ring-white">
+                Subscribe
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800">
+      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between">
+          <div class="flex space-x-6 md:order-2">
+            <a href="#" class="text-gray-400 hover:text-gray-300">
+              <span class="sr-only">Twitter</span>
+              <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-gray-300">
+              <span class="sr-only">LinkedIn</span>
+              <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd" />
+              </svg>
+            </a>
+          </div>
+          <div class="mt-8 md:mt-0 md:order-1">
+            <p class="text-center text-base text-gray-400">
+              &copy; 2025 TechFinance Pulse. All rights reserved. Powered by NewsAPI.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configuration
+      const apiKey = 'pub_73656259067ca9ad58b818dc4fddebefb8444'; // You'll need to replace this with a real NewsAPI key
+      let currentPage = 1;
+      let pageSize = 9;
+      let currentCategory = 'all';
+      let articles = [];
+      
+      // DOM Elements
+      const articlesContainer = document.getElementById('articles-container');
+      const articlesGrid = document.getElementById('articles-grid');
+      const loadingIndicator = document.getElementById('loading');
+      const errorMessage = document.getElementById('error-message');
+      const loadMoreButton = document.getElementById('load-more');
+      const refreshButton = document.getElementById('refresh-btn');
+      const filterAll = document.getElementById('filter-all');
+      const filterTech = document.getElementById('filter-tech');
+      const filterFinance = document.getElementById('filter-finance');
+      
+      // Initialize
+      fetchNews();
+      
+      // Event Listeners
+      loadMoreButton.addEventListener('click', loadMore);
+      refreshButton.addEventListener('click', refreshNews);
+      
+      // Category filters
+      filterAll.addEventListener('click', () => {
+        setActiveFilter(filterAll);
+        filterNews('all');
+      });
+      
+      filterTech.addEventListener('click', () => {
+        setActiveFilter(filterTech);
+        filterNews('technology');
+      });
+      
+      filterFinance.addEventListener('click', () => {
+        setActiveFilter(filterFinance);
+        filterNews('business');
+      });
+      
+      // Functions
+      function setActiveFilter(activeButton) {
+        // Reset all buttons
+        [filterAll, filterTech, filterFinance].forEach(btn => {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-white', 'text-gray-700');
+        });
+        
+        // Set active button
+        activeButton.classList.remove('bg-white', 'text-gray-700');
+        activeButton.classList.add('bg-indigo-600', 'text-white');
+      }
+      
+      function filterNews(category) {
+        currentCategory = category;
+        currentPage = 1;
+        articlesGrid.innerHTML = '';
+        fetchNews();
+      }
+      
+      function refreshNews() {
+        currentPage = 1;
+        articlesGrid.innerHTML = '';
+        fetchNews();
+      }
+      
+      function loadMore() {
+        currentPage++;
+        fetchNews();
+      }
+      
+      function fetchNews() {
+        showLoading();
+        
+        // In a real application, you would use your actual API key
+        // For demonstration purposes, we'll simulate an API response
+        
+        // Normally, you would make a fetch request like this:
+        // const url = `https://newsapi.org/v2/top-headlines?apiKey=${apiKey}&page=${currentPage}&pageSize=${pageSize}&category=${currentCategory === 'all' ? 'technology,business' : currentCategory}`;
+        // fetch(url)
+        //   .then(response => response.json())
+        //   .then(data => {
+        //     // Process the data
+        //   })
+        //   .catch(error => {
+        //     showError();
+        //   });
+        
+        // For demonstration, simulate API response with setTimeout
+        setTimeout(() => {
+          try {
+            const data = simulateApiResponse(currentCategory, currentPage, pageSize);
+            
+            if (currentPage === 1) {
+              articles = [...data.articles];
+            } else {
+              articles = [...articles, ...data.articles];
+            }
+            
+            renderArticles(articles);
+            hideLoading();
+            
+            // Hide load more button on last page
+            if (currentPage * pageSize >= data.totalResults) {
+              loadMoreButton.style.display = 'none';
+            } else {
+              loadMoreButton.style.display = 'inline-flex';
+            }
+          } catch (error) {
+            showError();
+          }
+        }, 1000);
+      }
+      
+      function renderArticles(articles) {
+        articlesContainer.classList.remove('hidden');
+        
+        articles.forEach(article => {
+          const articleCard = document.createElement('div');
+          articleCard.className = 'article-card bg-white rounded-lg shadow-md overflow-hidden';
+          
+          // Destructure article data with default values
+          const { 
+            title = 'No title available', 
+            description = 'No description available', 
+            urlToImage, 
+            publishedAt, 
+            source = { name: 'Unknown Source' }, 
+            url = '#',
+            category
+          } = article;
+          
+          // Format date
+          const date = new Date(publishedAt);
+          const formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          // Create article HTML
+          articleCard.innerHTML = `
+            <div class="relative">
+              <img class="h-48 w-full object-cover" src="${urlToImage || '/api/placeholder/400/300'}" alt="${title}">
+              <div class="absolute top-0 right-0 bg-indigo-600 text-white px-2 py-1 m-2 rounded text-xs font-bold">
+                ${category === 'technology' ? 'TECH' : 'FINANCE'}
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-xs text-gray-500 mb-1">${source.name} • ${formattedDate}</p>
+              <a href="${url}" target="_blank" class="block mt-2">
+                <p class="text-xl font-semibold text-gray-900 hover:text-indigo-600">${title}</p>
+                <p class="mt-3 text-base text-gray-500">${description ? description.substring(0, 120) + (description.length > 120 ? '...' : '') : 'No description available'}</p>
+              </a>
+              <div class="mt-6">
+                <a href="${url}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-medium">Read Full Article →</a>
+              </div>
+            </div>
+          `;
+          
+          articlesGrid.appendChild(articleCard);
+        });
+      }
+      
+      function showLoading() {
+        loadingIndicator.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+      }
+      
+      function hideLoading() {
+        loadingIndicator.classList.add('hidden');
+      }
+      
+      function showError() {
+        loadingIndicator.classList.add('hidden');
+        errorMessage.classList.remove('hidden');
+        articlesContainer.classList.add('hidden');
+      }
+      
+      // Simulate API response
+      function simulateApiResponse(category, page, pageSize) {
+        // Sample data that mimics the NewsAPI response format
+        const techArticles = [
+          {
+            source: { id: "techcrunch", name: "TechCrunch" },
+            author: "Jane Smith",
+            title: "AI Breakthrough: New Model Outperforms Humans in Complex Problem Solving",
+            description: "Researchers have developed a neural network architecture that demonstrates unprecedented capabilities in solving complex mathematical and logical problems that traditional AI has struggled with for decades.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-08T15:30:45Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "wired", name: "Wired" },
+            author: "John Doe",
+            title: "Quantum Computing Hits Major Milestone with 1000 Qubit Processor",
+            description: "A leading quantum computing company has announced the creation of a 1000 qubit processor, potentially bringing practical quantum computing applications closer to reality.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-07T09:15:22Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "theverge", name: "The Verge" },
+            author: "Sarah Johnson",
+            title: "Next-Gen AR Glasses Promise All-Day Wearability and Enhanced Reality",
+            description: "The latest augmented reality hardware finally addresses the form factor and battery life issues that have held back widespread adoption of AR technology.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-06T18:45:10Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "cnet", name: "CNET" },
+            author: "Michael Chen",
+            title: "Revolutionary Battery Technology Triples Electric Vehicle Range",
+            description: "A startup has demonstrated a new solid-state battery technology that could triple the range of electric vehicles while reducing charging time to under 10 minutes.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-05T11:20:33Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "techradar", name: "TechRadar" },
+            author: "Emily Wilson",
+            title: "Brain-Computer Interfaces Enter Clinical Trials for Paralysis Treatment",
+            description: "Non-invasive brain-computer interface technology has begun clinical trials, showing promising early results for patients with spinal cord injuries.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-04T14:50:18Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "arstechnica", name: "Ars Technica" },
+            author: "David Kim",
+            title: "Open Source AI Model Rivals Commercial Offerings at Fraction of Computing Cost",
+            description: "A new collaborative open source AI initiative has produced a model that matches or exceeds proprietary systems while requiring significantly less computational resources.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-03T16:25:05Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "theverge", name: "The Verge" },
+            author: "Lisa Park",
+            title: "Solar Cell Efficiency Record Shattered by New Photovoltaic Design",
+            description: "Researchers have created a multi-junction solar cell that achieves 47% efficiency, potentially revolutionizing solar energy economics.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-02T08:10:59Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "wired", name: "Wired" },
+            author: "Robert Jones",
+            title: "Autonomous Drone Network Deployed for Urban Package Delivery",
+            description: "A major logistics company has launched a network of autonomous drones for last-mile package delivery in several metropolitan areas after receiving regulatory approval.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-01T13:40:27Z",
+            content: "Full article content here...",
+            category: "technology"
+          },
+          {
+            source: { id: "techcrunch", name: "TechCrunch" },
+            author: "Sophia Martinez",
+            title: "Virtual Reality Education Platform Shows Dramatic Learning Improvements",
+            description: "A large-scale study of VR-based education shows significant improvements in student engagement, retention, and test scores compared to traditional methods.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-02-28T17:35:12Z",
+            content: "Full article content here...",
+            category: "technology"
+          }
+        ];
+        
+        const financeArticles = [
+          {
+            source: { id: "bloomberg", name: "Bloomberg" },
+            author: "Michael Stevens",
+            title: "Global Markets Rally as Central Banks Signal Policy Shift",
+            description: "Major stock indices surged as central banks coordinated a shift in monetary policy aimed at addressing persistent inflationary pressures while supporting continued economic growth.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-08T14:25:18Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "ft", name: "Financial Times" },
+            author: "Alexandra Wong",
+            title: "Sustainable Finance Investments Reach $10 Trillion Milestone",
+            description: "Global investment in sustainable finance instruments has crossed the $10 trillion mark, highlighting the growing importance of ESG factors in investment decisions.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-07T10:40:33Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "wsj", name: "Wall Street Journal" },
+            author: "Thomas Brown",
+            title: "Digital Currency Regulations Finalized by International Financial Authorities",
+            description: "A comprehensive framework for regulating digital currencies has been agreed upon by international financial authorities, providing clarity for institutional investors and exchanges.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-06T16:15:45Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "reuters", name: "Reuters" },
+            author: "Jennifer Lee",
+            title: "Renewable Energy Investment Outpaces Fossil Fuels for Third Consecutive Year",
+            description: "Global capital investment in renewable energy projects exceeded fossil fuel investments by 60% in the past year, continuing a trend of accelerating transition to clean energy.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-05T09:50:27Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "cnbc", name: "CNBC" },
+            author: "Richard Taylor",
+            title: "AI-Driven Investment Strategies Show Superior Returns in Market Volatility",
+            description: "Investment funds leveraging artificial intelligence for market analysis and trading decisions have significantly outperformed traditional strategies during recent market turbulence.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-04T13:30:11Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "bloomberg", name: "Bloomberg" },
+            author: "Samantha Wilson",
+            title: "Supply Chain Resilience Becomes Top Priority for Global Manufacturers",
+            description: "Manufacturing companies are investing heavily in supply chain diversification and resilience after recent global disruptions highlighted vulnerabilities in just-in-time systems.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-03T15:55:39Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "ft", name: "Financial Times" },
+            author: "Daniel Park",
+            title: "Asia-Pacific Economic Integration Accelerates with New Trade Agreement",
+            description: "Fifteen countries in the Asia-Pacific region have implemented a comprehensive trade agreement that removes tariffs on 90% of goods and streamlines cross-border investment.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-02T11:20:53Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "wsj", name: "Wall Street Journal" },
+            author: "Caroline Hughes",
+            title: "Corporate Carbon Pricing Becomes Standard Practice Among Fortune 500",
+            description: "Over 80% of Fortune 500 companies now use internal carbon pricing mechanisms to guide investment decisions and prepare for future carbon regulations.",
+            url: "#",
+            urlToImage: "/api/placeholder/400/300",
+            publishedAt: "2025-03-01T17:45:22Z",
+            content: "Full article content here...",
+            category: "business"
+          },
+          {
+            source: { id: "cnbc", name: "CNBC" },
+            author: "Jason Martinez",
+            title: "Quantum Computing Startups Attract Record Venture Capital Investment",
+            description: "Venture capital funding for quantum computing startups reached $12 billion in the first quarter, reflecting growing confidence in the technology's commercial applications.",
+            url: "#",
+            urlToImage
