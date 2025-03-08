@@ -2,11 +2,13 @@ from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import uvicorn
 from pydantic import BaseModel
 import os
 import shutil
+import fitz  # PyMuPDF for PDF text extraction
+import ollama  # AI model for resume analysis
 
 # Import functions from the separate modules
 from gemini_path import generate_learning_path
@@ -34,6 +36,12 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+# Create a directory for static files if it doesn't exist
+os.makedirs("static", exist_ok=True)
+
+# Mount static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Define response models for courses
 class Course(BaseModel):
@@ -64,6 +72,19 @@ class AnalysisResponse(BaseModel):
     message: str
     analysis: Optional[str] = None
     extracted_text: Optional[str] = None
+
+# Chatbot models
+class ChatMessage(BaseModel):
+    role: str  # 'user' or 'assistant'
+    content: str
+
+class ChatRequest(BaseModel):
+    message: str
+    conversation_history: Optional[List[ChatMessage]] = []
+
+class ChatResponse(BaseModel):
+    message: str
+    conversation_history: List[ChatMessage]
 
 # API Routes - these endpoints will be consumed by your frontend
 
@@ -106,9 +127,8 @@ async def get_learning_path(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating learning path: {str(e)}")
 
-
-
-@app.post("/analyze-resume", response_model=AnalysisResponse)
+# Resume Analyzer Endpoint
+@app.post("/api/analyze-resume", response_model=AnalysisResponse)
 async def analyze_resume_endpoint(file: UploadFile = File(...)):
     """Endpoint to analyze a resume from an uploaded PDF file"""
     if not file.filename.endswith('.pdf'):
@@ -146,13 +166,61 @@ async def analyze_resume_endpoint(file: UploadFile = File(...)):
             content={"success": False, "message": f"Error: {str(e)}"}
         )
 
+# Chatbot Endpoint
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_with_ai(request: ChatRequest):
+    """Endpoint for the AI chatbot conversation"""
+    try:
+        # Format the conversation history for the AI model
+        formatted_history = []
+        for msg in request.conversation_history:
+            formatted_history.append({"role": msg.role, "content": msg.content})
+        
+        # Define a system message to guide the AI behavior
+        system_message = {
+            "role": "system",
+            "content": """You are an AI learning assistant for Neural Ninjas, a platform for AI education. 
+            Help users with questions about AI, machine learning, programming, and career advice.
+            Be friendly, helpful, and concise. Provide practical answers and examples when appropriate.
+            For complex technical questions, break down your explanation step by step.
+            Do not pretend to have access to Neural Ninjas' specific course content beyond what a user shares with you."""
+        }
+        
+        # Add the new user message
+        new_message = {"role": "user", "content": request.message}
+        
+        # Combine conversation for the AI model
+        messages = [system_message] + formatted_history + [new_message]
+        
+        # Get response from Ollama AI
+        model = "llama3.2:1b"  # Or any other model you prefer
+        response = ollama.chat(model=model, messages=messages)
+        assistant_message = response['message']['content']
+        
+        # Update conversation history
+        updated_history = request.conversation_history + [
+            ChatMessage(role="user", content=request.message),
+            ChatMessage(role="assistant", content=assistant_message)
+        ]
+        
+        return ChatResponse(
+            message=assistant_message,
+            conversation_history=updated_history
+        )
+    except Exception as e:
+        print(f"Error in chatbot: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"message": "Sorry, I'm having trouble processing your request right now."}
+        )
+
+
+
 # Health check endpoint
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint to verify API is running"""
     return {"status": "healthy"}
-
-
 
 if __name__=="__main__":
     uvicorn.run(app, host="127.0.0.1", port=8080)

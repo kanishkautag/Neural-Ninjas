@@ -10,6 +10,31 @@
 </head>
 <body class="font-sans antialiased bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
     <!-- Navigation Bar -->
+
+    <div class="chat-icon" id="chatIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </div>
+    
+    <!-- Chat Widget (initially hidden) -->
+    <div class="chat-widget hidden" id="chatWidget">
+        <div class="chat-header">
+            <h3>Career Guidance Assistant</h3>
+            <button class="toggle-chat" id="toggleChat">−</button>
+        </div>
+        <div class="chat-body">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    Hi there! I'm your career guidance assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="userQuestion" placeholder="Ask about career advice..." />
+                <button id="sendQuestion">Send</button>
+            </div>
+        </div>
+    </div>
     <nav class="bg-gradient-to-r from-purple-700 to-blue-500 shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -40,7 +65,7 @@
                         <a href="courses.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Courses</a>
                         <a href="#recommendations" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Recommendations</a>
                         <a href="#chatbot" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">AI Chatbot</a>
-                        <a href="#resume" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Resume Analyzer</a>
+                        <a href="resume.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Resume Analyzer</a>
                     </div>
                     <div class="ml-6 flex items-center">
                         <button id="theme-toggle" class="p-2 rounded-md text-white mr-2" aria-label="Toggle theme">
@@ -412,39 +437,95 @@
         </div>
     </section>
     
-    <!-- AI Chatbot Section -->
-    <section id="chatbot" class="py-20 bg-gray-100 dark:bg-gray-800 transition-colors duration-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
-                <div class="mt-10 lg:mt-0 order-first lg:order-last">
-                    <img src="/api/placeholder/640/480" alt="AI Chatbot" class="rounded-lg shadow-xl">
-                </div>
-                <div>
-                    <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-                        AI Assistant
-                    </h2>
-                    <p class="mt-4 text-lg text-gray-500 dark:text-gray-300">
-                        Get instant help with your AI and machine learning questions, coding problems, and career guidance from our advanced AI assistant.
-                    </p>
-                    <div class="mt-6">
-                        <ul class="space-y-4">
-                            <li class="flex">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span class="text-gray-700 dark:text-gray-300">24/7 assistance with technical questions</span>
-                            </li>
-                            <li class="flex">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span class="text-gray-700 dark:text-gray-300">Code debugging and optimization help</span>
-                            </li>
-                            <li class="flex">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span class="text-gray-700 dark:text-gray-300">Personalized learning recommendations</span>
-                            </li>
-                            <li class="flex">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span class="text-gray-700 dark:text-gray-300">Career advice and industry insights</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="mt-8">
-                        <a href="#" class="inline-flex items-center px-6 py-3 border border-transparent text-base>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatIcon = document.getElementById('chatIcon');
+            const chatWidget = document.getElementById('chatWidget');
+            const toggleChat = document.getElementById('toggleChat');
+            const chatMessages = document.getElementById('chatMessages');
+            const userQuestion = document.getElementById('userQuestion');
+            const sendQuestion = document.getElementById('sendQuestion');
+            
+            // Toggle chat widget when icon is clicked
+            chatIcon.addEventListener('click', function() {
+                chatWidget.classList.toggle('hidden');
+                if (!chatWidget.classList.contains('hidden')) {
+                    userQuestion.focus();
+                }
+            });
+            
+            // Toggle chat minimized state
+            toggleChat.addEventListener('click', function() {
+                chatWidget.classList.toggle('chat-minimized');
+                toggleChat.textContent = chatWidget.classList.contains('chat-minimized') ? '+' : '−';
+            });
+            
+            // Send question when button is clicked
+            sendQuestion.addEventListener('click', sendUserQuestion);
+            
+            // Send question when Enter key is pressed
+            userQuestion.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendUserQuestion();
+                }
+            });
+            
+            function sendUserQuestion() {
+                const question = userQuestion.value.trim();
+                if (!question) return;
+                
+                // Add user message to chat
+                addMessage(question, 'user-message');
+                
+                // Clear input
+                userQuestion.value = '';
+                
+                // Add loading indicator
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'message bot-message';
+                loadingDiv.innerHTML = '<div class="loading"></div>';
+                chatMessages.appendChild(loadingDiv);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Send to backend
+                fetch('http://127.0.0.1:8080/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: question,
+                        conversation_history: [] // You can implement conversation history if needed
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove loading indicator
+                    chatMessages.removeChild(loadingDiv);
+                    
+                    // Add bot response
+                    addMessage(data.message, 'bot-message');
+                })
+                .catch(error => {
+                    // Remove loading indicator
+                    chatMessages.removeChild(loadingDiv);
+                    
+                    // Add error message
+                    addMessage('Sorry, an error occurred. Please try again.', 'bot-message');
+                    console.error('Error:', error);
+                });
+            }
+            
+            function addMessage(text, className) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ' + className;
+                messageDiv.textContent = text;
+                chatMessages.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+        </script>

@@ -180,7 +180,7 @@
         </div>
 
         <div class="footer">
-            <p>© 2025 Resume Analyzer & Learning Path Generator | Powered by FastAPI and Ollama</p>
+            <p>© 2025 Resume Analyzer | Powered by FastAPI and Ollama</p>
         </div>
     </div>
 
@@ -219,7 +219,7 @@
                 const formData = new FormData();
                 formData.append('file', fileUpload.files[0]);
 
-                fetch('/analyze-resume', {
+                fetch('http://127.0.0.1:8080/api/analyze-resume', {
                     method: 'POST',
                     body: formData
                 })
