@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Barba.js Website</title>
+    <script src="https://unpkg.com/@barba/core"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [data-barba-container] { opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .barba-enter { opacity: 0; }
+        .barba-enter-active { opacity: 1; transition: opacity 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div id="barba-wrapper">
+        <div class="min-h-screen flex flex-col items-center justify-center" data-barba="container">
+            <h1 class="text-4xl font-bold mb-4">Welcome to Real-time Barba.js</h1>
+            <div id="messages" class="w-96 h-48 border p-4 overflow-y-auto bg-white shadow-md"></div>
+            <input id="messageInput" type="text" class="border p-2 mt-4 w-96" placeholder="Type a message..." />
+            <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 mt-2 rounded">Send</button>
+            <nav class="mt-6">
+                <a href="page2.html" class="text-blue-500">Go to Page 2</a>
+            </nav>
+        </div>
+    </div>
+    <script>
+        const socket = new WebSocket("ws://localhost:8000/ws");
+        socket.onmessage = function(event) {
+            const messagesDiv = document.getElementById("messages");
+            const newMessage = document.createElement("div");
+            newMessage.textContent = event.data;
+            messagesDiv.appendChild(newMessage);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            if (input.value) {
+                socket.send(input.value);
+                input.value = "";
+            }
+        }
+        barba.init({
+            transitions: [{
+                name: "fade",
+                leave(data) { return gsap.to(data.current.container, { opacity: 0 }); },
+                enter(data) { return gsap.from(data.next.container, { opacity: 0 }); }
+            }]
+        });
+    </script>
+</body>
+</html>
