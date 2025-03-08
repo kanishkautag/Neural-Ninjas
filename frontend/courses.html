@@ -404,7 +404,7 @@
         // Fetch available levels from API
         async fetchLevels() {
           try {
-            const response = await fetch("http://127.0.0.1:8080/courses/levels");
+            const response = await fetch("http://127.0.0.1:8080/api/courses/levels");
             if (!response.ok) throw new Error("Failed to load course levels");
             const data = await response.json();
             this.availableLevels = data.levels;
@@ -426,24 +426,24 @@
           this.showLevelModal = false;
           this.fetchCourses();
         },
-        // Fetch courses from API (note the updated endpoint "/courses/reccommend")
+        // Fetch courses from API (fixed endpoint to match backend)
         async fetchCourses() {
           this.loading = true;
           try {
             const response = await fetch(
-              `http://127.0.0.1:8080/courses/recommend?level=${encodeURIComponent(
+              `http://127.0.0.1:8080/api/courses/recommend?level=${encodeURIComponent(
                 this.selectedLevel
               )}&subject=${encodeURIComponent(this.selectedSubject)}&limit=9`
             );
-
+    
             if (!response.ok) {
               const error = await response.json();
               throw new Error(error.detail || "Failed to fetch course recommendations");
             }
-
+    
             const data = await response.json();
             this.apiCourses = data.recommendations;
-
+    
             // If no courses found, show a message
             if (this.apiCourses.length === 0) {
               console.log("No courses found for the selected criteria");
@@ -461,14 +461,14 @@
         getHeaderText() {
           if (!this.selectedCategory) return "Select a category to get started";
           if (!this.selectedLevel) return `Choose your experience level`;
-
+    
           const categoryText = {
             business: "Business & Finance",
             design: "Graphic Design",
             music: "Musical Instruments",
             webdev: "Web Development",
           };
-
+    
           return `${this.selectedLevel} ${categoryText[this.selectedCategory] || ""} Courses`;
         },
         // Get category text for level modal
@@ -479,7 +479,7 @@
             music: "Musical Instruments",
             webdev: "Web Development",
           };
-
+    
           return categoryText[this.selectedCategory] || "";
         },
       };
