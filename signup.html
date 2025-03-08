@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.5.0/mdb.min.css" rel="stylesheet" />
+    <link href="./index.css" rel="stylesheet" />
+    <link rel="icon" href="/calendar/calendar/images/image.png">
+  <title>PocketPlanner</title>
+</head>
+<style>
+    body {
+        display: grid;
+        background-image: url('https://t4.ftcdn.net/jpg/03/49/77/45/360_F_349774531_GVBujUQPMDHdptTix4m13kQ62Qgy4jiA.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .one {
+            grid-column: 1 / 2;
+            /* width: 60vw; */
+           
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6%;
+            
+        }
+    .card{
+        grid-column: 2/2;
+        border-radius: 5%;
+        margin-left: 15%;
+        height: 85vh;
+        width: 30vw;
+        box-shadow: 2px 2px 15px white;
+        border-radius: 3%;
+
+    }
+    #signUpBtn{
+        width: 30%;
+        font-size: 110%;
+    }
+   
+</style>
+
+<body class="d-flex justify-content-center p-5">
+    <div class="one">
+        <div class="sidecon" style="color: white;">
+            <h1 style="font-size: 400%;">Nice to see you again!</h1>
+            <p style="font-size: 200%;">Have a good day</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <center style="margin-top: 15%;">
+                <h3> Create a new account</h3>
+            </center>
+        </div>
+        <form id="loginForm" onsubmit="signUp(); return false;" class="card-body px-5 py-4">
+            <center>
+                <small><span id="error" style="color: red"></span></small>
+            </center>
+            <center>
+                <label class="custom-field">
+                    <input id="firstname" type="text" class="input" required />
+                    <span class="placeholder">First Name:</span>
+                </label>
+                <br>
+                <label class="custom-field">
+                    <input id="lastname" type="text" class="input" required />
+                    <span class="placeholder">Last Name:</span>
+                </label>
+                <br>
+                <label class="custom-field">
+                    <input id="email" type="text" class="input" required />
+                    <span class="placeholder">Email Id</span>
+                </label><br>
+                <label class="custom-field">
+                    <input id="password" type="password" class="input" required />
+                    <span class="placeholder">Password</span>
+                </label>
+            </center><br /><br />
+       
+            <center>
+                
+                <button id="signUpBtn" onclick="signUp() " class="btn btn-secondary ">Sign Up</button>
+            </center>
+            <br><br>
+            <center>
+                <h4>Already have an account? <a href="login.html">Login</a></h4>
+            </center>
+        </form>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js "></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js "></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-database.js"></script>
+    <script src="firebase.js "></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
