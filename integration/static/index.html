@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="/dist/output.css" class="css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --background: #111827;
+            --card-bg: #1f2937;
+            --text: #e5e7eb;
+            --text-secondary: #9ca3af;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .resume-card {
+            background-color: var(--card-bg);
+            transition: all 0.3s ease;
+        }
+        
+        .resume-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .keyword-badge {
+            background-color: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+        
+        progress {
+            border-radius: 7px;
+            height: 8px;
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: #374151;
+            border-radius: 7px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--primary);
+            border-radius: 7px;
+        }
+        
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #FFF;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        
+        .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-bottom-color: var(--primary);
+        }
+        
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Navbar specific styles */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .mobile-menu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%);
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        /* Added styles for analysis results */
+        .analysis-section {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .error-alert {
+            background-color: rgba(220, 38, 38, 0.2);
+            border-left: 4px solid rgb(220, 38, 38);
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Navbar -->
+    <nav class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-xl font-bold text-white">UpSkill</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-link active text-indigo-400 hover:text-indigo-300">Home</a>
+                    <a href="#" class="nav-link text-gray-300 hover:text-indigo-300">Courses</a>
+                    <a href="#" class="nav-link text-gray-300 hover:text-indigo-300">Resume Tools</a>
+                    <a href="#" class="nav-link text-gray-300 hover:text-indigo-300">Career Paths</a>
+                    <a href="#" class="nav-link text-gray-300 hover:text-indigo-300">About Us</a>
+                </div>
+                
+                <!-- Desktop Action Buttons -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <i class="fas fa-search text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <i class="fas fa-user-circle text-lg"></i>
+                    </a>
+                    <a href="#" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-300">Sign In</a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div id="mobile-menu" class="mobile-menu absolute left-0 w-full bg-gray-900 border-b border-gray-800 md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="#" class="block px-3 py-2 rounded-md text-indigo-400 font-medium">Home</a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white font-medium">Courses</a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white font-medium">Resume Tools</a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white font-medium">Career Paths</a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white font-medium">About Us</a>
+                </div>
+                <div class="px-5 pt-4 pb-5 border-t border-gray-800">
+                    <a href="#" class="block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-center transition duration-300">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-12">
+            <h1 class="text-4xl font-bold text-center mb-4">Resume Analyzer</h1>
+            <p class="text-gray-400 text-center max-w-2xl mx-auto">Upload your resume and get instant analysis of your skills, experience, and suggestions for improvement</p>
+        </header>
+        
+        <!-- Error Alert -->
+        <div id="error-alert" class="hidden max-w-2xl mx-auto mb-8">
+            <div class="error-alert p-4 rounded-lg">
+                <h3 class="font-medium text-lg mb-2 text-red-400">Error</h3>
+                <p id="error-message" class="text-gray-300"></p>
+            </div>
+        </div>
+        
+        <!-- Upload Section -->
+        <div id="upload-section" class="max-w-2xl mx-auto mb-12">
+            <div class="resume-card p-8 rounded-xl mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Upload Your Resume</h2>
+                <form id="resume-form" enctype="multipart/form-data">
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
+                        <label for="resume-upload" class="flex flex-col items-center cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <span class="text-lg font-medium mb-2">Drop your resume here or click to browse</span>
+                            <span class="text-sm text-gray-400">Supports PDF files only (Max 5MB)</span>
+                            <input id="resume-upload" name="file" type="file" class="hidden" accept=".pdf" required />
+                        </label>
+                    </div>
+                    <div class="mt-6 flex justify-center">
+                        <button type="submit" id="analyze-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                            Analyze Resume
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loading-section" class="hidden max-w-2xl mx-auto text-center py-12">
+            <span class="loader"></span>
+            <p class="mt-6 text-xl">Analyzing your resume...</p>
+            <p class="text-gray-400 mt-2">This might take a few seconds</p>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="results-section" class="hidden">
+            <!-- Overall Score -->
+            <div class="max-w-5xl mx-auto mb-8">
+                <div class="resume-card p-8 rounded-xl">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold">Overall Resume Score</h2>
+                        <div class="bg-indigo-900 bg-opacity-50 rounded-full px-4 py-2 text-indigo-300 font-medium">
+                            <span id="overall-score">0</span>/10
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap -mx-2">
+                        <div class="w-full px-2 mb-4">
+                            <div class="p-4 bg-gray-800 bg-opacity-50 rounded-lg">
+                                <h3 class="text-gray-400 mb-2">Content Quality</h3>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span id="content-score" class="font-medium">0%</span>
+                                </div>
+                                <progress id="content-progress" value="0" max="100" class="w-full"></progress>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analysis Content -->
+            <div class="grid grid-cols-1 gap-8 max-w-5xl mx-auto mb-8">
+                <!-- AI Analysis Section -->
+                <div class="resume-card p-8 rounded-xl">
+                    <h2 class="text-2xl font-semibold mb-6">AI Resume Analysis</h2>
+                    <div id="analysis-content" class="analysis-section">
+                        <!-- AI analysis will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Extracted Text (Optional) -->
+                <div class="resume-card p-8 rounded-xl">
+                    <h2 class="text-2xl font-semibold mb-6">Extracted Resume Text</h2>
+                    <div id="extracted-text" class="text-gray-300 max-h-96 overflow-y-auto">
+                        <!-- Extracted text will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Call to Action -->
+            <div class="max-w-2xl mx-auto text-center mb-12">
+                <button id="reset-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 px-8 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                    Analyze Another Resume
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!mobileMenu.contains(event.target) && event.target !== mobileMenuButton) {
+                    mobileMenu.classList.remove('active');
+                }
+            });
+            
+            const resumeForm = document.getElementById('resume-form');
+            const resumeUpload = document.getElementById('resume-upload');
+            const loadingSection = document.getElementById('loading-section');
+            const resultsSection = document.getElementById('results-section');
+            const uploadSection = document.getElementById('upload-section');
+            const resetBtn = document.getElementById('reset-btn');
+            const errorAlert = document.getElementById('error-alert');
+            const errorMessage = document.getElementById('error-message');
+            let fileName = '';
+            
+            // Display file name when selected
+            resumeUpload.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    fileName = e.target.files[0].name;
+                    const fileParent = resumeUpload.parentElement;
+                    const fileNameDisplay = document.createElement('div');
+                    fileNameDisplay.classList.add('mt-4', 'text-indigo-400');
+                    fileNameDisplay.innerHTML = `<span class="font-medium">Selected file:</span> ${fileName}`;
+                    
+                    // Remove any previous file name display
+                    const previousFileDisplay = fileParent.parentElement.querySelector('div:last-child');
+                    if (previousFileDisplay && previousFileDisplay.classList.contains('text-indigo-400')) {
+                        previousFileDisplay.remove();
+                    }
+                    
+                    fileParent.parentElement.appendChild(fileNameDisplay);
+                }
+            });
+            
+            // Handle form submission
+            resumeForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!resumeUpload.files.length) {
+                    showError("Please select a resume file first");
+                    return;
+                }
+                
+                const file = resumeUpload.files[0];
+                
+                // Check if file is PDF
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    showError("Please upload a PDF file");
+                    return;
+                }
+                
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    showError("File size exceeds 5MB limit");
+                    return;
+                }
+                
+                // Hide error if previously shown
+                errorAlert.classList.add('hidden');
+                
+                // Show loading state
+                uploadSection.classList.add('hidden');
+                loadingSection.classList.remove('hidden');
+                
+                // Create FormData object
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Send API request
+                fetch('/analyze-resume', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loadingSection.classList.add('hidden');
+                    
+                    if (!data.success) {
+                        uploadSection.classList.remove('hidden');
+                        showError(data.message);
+                        return;
+                    }
+                    
+                    // Display results
+                    displayResults(data);
+                    resultsSection.classList.remove('hidden');
+                })
+                .catch(error => {
+                    loadingSection.classList.add('hidden');
+                    uploadSection.classList.remove('hidden');
+                    showError("An error occurred while analyzing the resume. Please try again.");
+                    console.error('Error:', error);
+                });
+            });
+            
+            // Function to display error
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorAlert.classList.remove('hidden');
+            }
+            
+            // Function to display analysis results
+            function displayResults(data) {
+                // Parse analysis text for score
+                const analysisText = data.analysis;
+                document.getElementById('analysis-content').textContent = analysisText;
+                
+                // Extract score (assuming it's in the format "Score: X/10" or similar)
+                let score = 7; // Default score if we can't extract one
+                const scoreMatch = analysisText.match(/(\d+(?:\.\d+)?)\s*\/\s*10/);
+                if (scoreMatch && scoreMatch[1]) {
+                    score = parseFloat(scoreMatch[1]);
+                }
+                
+                // Update score display
+                const scoreElement = document.getElementById('overall-score');
+                const contentScore = document.getElementById('content-score');
+                const contentProgress = document.getElementById('content-progress');
+                
+                // Animate score
+                let currentScore = 0;
+                const scoreInterval = setInterval(() => {
+                    currentScore += 0.1;
+                    scoreElement.textContent = Math.min(currentScore, score).toFixed(1);
+                    if (currentScore >= score) {
+                        clearInterval(scoreInterval);
+                    }
+                }, 30);
+                
+                // Set content score percentage (score * 10 to convert to percentage)
+                const percentage = score * 10;
+                contentScore.textContent = `${percentage.toFixed(0)}%`;
+                
+                // Animate progress bar
+                contentProgress.value = 0;
+                let currentValue = 0;
+                const interval = setInterval(() => {
+                    currentValue += 1;
+                    contentProgress.value = currentValue;
+                    if (currentValue >= percentage) {
+                        clearInterval(interval);
+                    }
+                }, 20);
+                
+                // Display extracted text if available
+                if (data.extracted_text) {
+                    document.getElementById('extracted-text').textContent = data.extracted_text;
+                } else {
+                    document.getElementById('extracted-text').textContent = "No text could be extracted from the resume.";
+                }
+            }
+            
+            // Reset button click
+            resetBtn.addEventListener('click', function() {
+                resultsSection.classList.add('hidden');
+                uploadSection.classList.remove('hidden');
+                errorAlert.classList.add('hidden');
+                
+                // Clear file input
+                resumeUpload.value = '';
+                fileName = '';
+                
+                // Remove displayed file name if any
+                const fileParent = resumeUpload.parentElement;
+                const fileNameDisplay = fileParent.parentElement.querySelector('div:last-child');
+                if (fileNameDisplay && fileNameDisplay.classList.contains('text-indigo-400')) {
+                    fileNameDisplay.remove();
+                }
+            });
+            
+            // Add drag and drop functionality
+            const dropZone = document.querySelector('.border-dashed');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropZone.classList.add('bg-gray-800', 'bg-opacity-50');
+            }
+            
+            function unhighlight() {
+                dropZone.classList.remove('bg-gray-800', 'bg-opacity-50');
+            }
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                resumeUpload.files = files;
+                
+                // Trigger change event
+                const event = new Event('change');
+                resumeUpload.dispatchEvent(event);
+            }
+        });
+    </script>
+</body>
+</html>
