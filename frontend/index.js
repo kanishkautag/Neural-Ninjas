@@ -18,7 +18,8 @@ function signUp(email, password, firstname, lastname) {
             user.sendEmailVerification()
                 .then(() => {
                     console.log("Verification email sent");
-                    saveEntryToFirebase(userId, firstname, lastname, () => {
+                    // Save both name and email to Firebase
+                    saveEntryToFirebase(userId, email, firstname, lastname, () => {
                         alert("Verification Email Sent")
                         location.replace("login.html");
                     });
@@ -34,11 +35,14 @@ function signUp(email, password, firstname, lastname) {
         });
 }
 
-function saveEntryToFirebase(userId, firstname, lastname, callback) {
+// Updated function to include email in the saved data
+function saveEntryToFirebase(userId, email, firstname, lastname, callback) {
     const database = firebase.database();
     database.ref('users/' + userId).set({
+        email: email,
         firstname: firstname,
-        lastname: lastname
+        lastname: lastname,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
     }).then(() => {
         if (callback && typeof callback === 'function') {
             callback();
@@ -50,14 +54,17 @@ function saveEntryToFirebase(userId, firstname, lastname, callback) {
 
 function clearErrorMessage() {
     const errorMessage = document.getElementById("error");
-    errorMessage.innerHTML = ""; 
+    if (errorMessage) {
+        errorMessage.innerHTML = ""; 
+    }
 }
 
 function displayErrorMessage(message) {
     const errorMessage = document.getElementById("error");
-    errorMessage.innerHTML = message;
-
-    setTimeout(clearErrorMessage, 5000);
+    if (errorMessage) {
+        errorMessage.innerHTML = message;
+        setTimeout(clearErrorMessage, 5000);
+    }
 }
 
 firebase.auth().onAuthStateChanged((user) => {
@@ -65,8 +72,6 @@ firebase.auth().onAuthStateChanged((user) => {
         sessionStorage.setItem("user", JSON.stringify(user));
     }
 });
-
-
 
 function login() {
     clearErrorMessage();
@@ -77,23 +82,23 @@ function login() {
         .then((userCredential) => {
             const user = userCredential.user;
             if (user.emailVerified) {
-
-                location.replace("home.html");
+                location.replace("./home.html");
             } else {
                 document.getElementById("error").innerHTML = "Please verify your email address first.";
-
             }
-
         })
-
-    .catch((error) => {
-        document.getElementById("error").innerHTML = error.message;
-    });
+        .catch((error) => {
+            document.getElementById("error").innerHTML = error.message;
+        });
 }
 
 function logout() {
-    sessionStorage.removeItem("user");
-    location.replace("/login.html");
+    firebase.auth().signOut().then(() => {
+        sessionStorage.removeItem("user");
+        location.replace("./login.html");
+    }).catch((error) => {
+        console.error("Error signing out:", error);
+    });
 }
 
 function sendVerificationEmail(email, password) {

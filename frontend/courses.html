@@ -239,13 +239,14 @@
   <header class="gradient-bg py-8 relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-blue-900/40"></div>
     <div class="container mx-auto px-4 relative">
-      <nav class="flex justify-between items-center mb-16">
-        <div
-          class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
-        >
-          CourseHub
-        </div>
-        <button
+      <nav class="bg-gray-800 py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-xl font-bold">Developer Network</div>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="hover:text-blue-400">Home</a>
+                <a href="profile.html" class="hover:text-blue-400">Profile</a>
+                <a href="job_openings.html" class="text-blue-400 font-semibold">Job Openings</a>
+                <button
           @click="showCategoryModal = true"
           class="py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center space-x-2 border border-gray-700 transition duration-300"
         >
@@ -262,8 +263,12 @@
               clip-rule="evenodd"
             />
           </svg>
-        </button>
-      </nav>
+        </button> 
+                <button id="logout-button" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Logout</button>
+            </div>
+        </div>
+    </nav>
+        
       <div class="text-center">
         <h1
           class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent"

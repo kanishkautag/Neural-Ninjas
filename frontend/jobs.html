@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Openings | Developer Network</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-gray-800 py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-xl font-bold">Developer Network</div>
+            <div class="flex items-center space-x-4">
+                <a href="home.html" class="hover:text-blue-400">Home</a>
+                <a href="user.html" class="hover:text-blue-400">Profile</a>
+                <a href="job_openings.html" class="text-blue-400 font-semibold">Job Openings</a>
+                <button id="logout-button" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Filters Section -->
+    <div class="container mx-auto mt-6">
+        <h2 class="text-2xl font-bold mb-4">Find Jobs Matching Your Profile</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <!-- Location Filter -->
+            <div>
+                <label for="filter-location" class="text-sm text-gray-400">Location</label>
+                <select id="filter-location" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    <option value="">All Locations</option>
+                </select>
+            </div>
+
+            <!-- Industry Filter -->
+            <div>
+                <label for="filter-industry" class="text-sm text-gray-400">Industry</label>
+                <select id="filter-industry" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    <option value="">All Industries</option>
+                </select>
+            </div>
+
+            <!-- Search Bar -->
+            <div>
+                <label for="search-job" class="text-sm text-gray-400">Search Job Title</label>
+                <input type="text" id="search-job" placeholder="e.g. Frontend Developer"
+                    class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+            </div>
+        </div>
+
+        <!-- Search Button -->
+        <div class="mt-4 text-center">
+            <button id="search-button" class="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700">Search</button>
+        </div>
+    </div>
+
+   
+    <!-- Jobs Section -->
+    <div class="container mx-auto mt-8">
+        <h2 class="text-xl font-bold mb-4">Available Jobs</h2>
+        <div id="jobs-container" class="space-y-4">
+            <div id="loading-message" class="text-center text-gray-400">
+                Loading job openings...
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Script -->
+    <script>
+        // Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCkcLCqyAGP9HOUjPIx8Sg75-uVbh3_HmQ",
+            authDomain: "signup-d66c5.firebaseapp.com",
+            databaseURL: "https://signup-d66c5-default-rtdb.firebaseio.com",
+            projectId: "signup-d66c5",
+            storageBucket: "signup-d66c5.appspot.com",
+            messagingSenderId: "847953931653",
+            appId: "1:847953931653:web:41d05ae9d308af716fe8ec"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Fetch user profile from Firebase
+        function fetchUserProfile() {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const userId = user.uid;
+            firebase.database().ref('userinfo/' + userId).once('value')
+                .then(snapshot => {
+                    const userData = snapshot.val();
+                    if (userData) {
+                        const industry = userData.industry || 'All Industries';
+                        const location = userData.location || 'All Locations';
+
+                        document.getElementById('filter-industry').innerHTML = `<option value="${industry}">${industry}</option>`;
+                        document.getElementById('filter-location').innerHTML = `<option value="${location}">${location}</option>`;
+                        
+                        // Now fetch jobs based on the user's profile
+                        fetchJobs(industry, location);
+                    }
+                })
+                .catch(error => console.error("Error fetching user profile:", error));
+        }
+
+        // Fetch jobs from Firebase Database
+        function fetchJobs(industry, location) {
+            const jobContainer = document.getElementById('jobs-container');
+            jobContainer.innerHTML = '<p class="text-center text-gray-400">Loading job openings...</p>';
+
+            firebase.database().ref('jobs').once('value')
+                .then(snapshot => {
+                    jobContainer.innerHTML = '';
+                    let jobCount = 0;
+
+                    snapshot.forEach(childSnapshot => {
+                        const job = childSnapshot.val();
+
+                        // Filter jobs based on user's industry and location
+                        if ((job.industry === industry || industry === 'All Industries') &&
+                            (job.location === location || location === 'All Locations')) {
+                            renderJobCard(job);
+                            jobCount++;
+                        }
+                    });
+
+                    if (jobCount === 0) {
+                        jobContainer.innerHTML = '<p class="text-center text-gray-400">No job openings found.</p>';
+                    }
+                })
+                .catch(error => console.error("Error fetching jobs:", error));
+        }
+
+        // Render a job card
+        function renderJobCard(job) {
+            const jobContainer = document.getElementById('jobs-container');
+            const jobCard = `
+                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                    <h3 class="text-lg font-bold">${job.title}</h3>
+                    <p class="text-gray-400">${job.company}</p>
+                    <p class="text-sm text-gray-500">${job.location}</p>
+                    <div class="text-sm text-gray-300">${job.description}</div>
+                    <a href="${job.applyLink}" class="text-blue-400 mt-2 block">Apply Now</a>
+                </div>
+            `;
+            jobContainer.innerHTML += jobCard;
+        }
+
+        // Handle Logout
+        document.getElementById('logout-button').addEventListener('click', () => {
+            firebase.auth().signOut().then(() => window.location.href = 'login.html');
+        });
+
+        // Handle Search Button Click
+        // Handle Search Button Click with API
+document.getElementById('search-button').addEventListener('click', () => {
+    const industry = document.getElementById('filter-industry').value;
+    const location = document.getElementById('filter-location').value;
+    const keywords = document.getElementById('search-job').value;
+    
+    // Create the request payload
+    const payload = {
+        industry: industry || "All Industries",
+        keywords: keywords || "",
+        location: location || "All Locations",
+        time_period: "recent" // You could add a time period filter if needed
+    };
+    
+    // Make API request
+    fetch('http://127.0.0.1:8080/api/job-search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayJobs(data.jobs);
+    })
+    .catch(error => {
+        console.error("Error fetching jobs:", error);
+        const jobContainer = document.getElementById('jobs-container');
+        jobContainer.innerHTML = '<p class="text-center text-gray-400">Error loading job openings. Please try again.</p>';
+    });
+});
+
+// Function to display jobs from the API response
+function displayJobs(jobs) {
+    const jobContainer = document.getElementById('jobs-container');
+    jobContainer.innerHTML = '';
+    
+    if (jobs.length === 0) {
+        jobContainer.innerHTML = '<p class="text-center text-gray-400">No job openings found.</p>';
+        return;
+    }
+    
+    jobs.forEach(job => {
+        const jobCard = `
+            <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <h3 class="text-lg font-bold">${job.title}</h3>
+                <p class="text-gray-400">${job.source}</p>
+                <p class="text-sm text-gray-500">${job.link}</p>
+                <div class="text-sm text-gray-300">${job.snippet}</div>
+                <a href="${job.link}" class="text-blue-400 mt-2 block" target="_blank">Apply Now</a>
+            </div>
+        `;
+        jobContainer.innerHTML += jobCard;
+    });
+}
+
+        // On page load
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                fetchUserProfile();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>

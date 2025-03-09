@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Journey Path</title>
+    <link rel="stylesheet" href="output.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <style>
@@ -33,7 +34,7 @@
             left: 1.5rem;
             height: calc(100% - 1rem);
             width: 2px;
-            background-color: #3B82F6;
+            background-color: #6366F1;
             z-index: 1;
         }
         
@@ -59,63 +60,162 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        nav {
+            background: linear-gradient(to right, #6b46c1, #3182ce);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 30px 0;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <header class="bg-blue-600 text-white p-6 shadow-md">
-        <div class="container mx-auto">
-            <h1 class="text-3xl font-bold">Learning Journey</h1>
-            <p class="mt-2">Track your progress through personalized learning paths</p>
-        </div>
-    </header>
+<body class="bg-gradient-to-br from-indigo-50 to-blue-50 min-h-screen">
     
-    <main class="container mx-auto p-6">
-        <section class="bg-white rounded-lg shadow-md p-6 max-w-3xl mx-auto">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Career Learning Path</h2>
-            
-            <div class="mb-6">
-                <label for="career" class="block text-sm font-medium text-gray-700 mb-2">Career Goal</label>
-                <input type="text" id="career" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Machine Learning Engineer">
-                
-                <div class="mt-4">
-                    <label for="numPoints" class="block text-sm font-medium text-gray-700 mb-2">Number of Learning Points</label>
-                    <input type="number" id="numPoints" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" value="10" min="5" max="20">
+    <nav>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-brain text-white text-3xl mr-2"></i>
+                        <span class="text-white font-bold text-2xl">SkillMorph</span>
+                    </a>
                 </div>
                 
-                <div class="mt-4">
-                    <button id="pathBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:bg-gray-400">
+                <!-- Mobile menu button -->
+                <div class="flex items-center sm:hidden">
+                    <button id="theme-toggle-mobile" class="p-2 rounded-md text-white mr-2" aria-label="Toggle theme">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-white" aria-label="Open menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden sm:flex sm:items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="home.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="jobs.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Recent Jobs</a>
+                        <a href="courses.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Courses</a>
+                        <a href="learning.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Visualization</a>
+                        <a href="resume.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Resume Analyzer</a>
+                    </div>
+                    <div class="ml-6 flex items-center">
+                        <button id="theme-toggle" class="p-2 rounded-md text-white mr-2 hover:bg-purple-700 transition-colors duration-200" aria-label="Toggle theme">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:inline"></i>
+                        </button>
+                        <div class="relative ml-3">
+                            <div>
+                            <a href="user.html">
+                                <button type="button" class="bg-white flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-800 focus:ring-white" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                    <span class="sr-only">Open user menu</span>
+                                    <img class="h-8 w-8 rounded-full" src="userprofile.jpg" alt="User profile">
+                                </button>
+                            </a>
+                            </div>
+                            <!-- Dropdown menu, show/hide based on menu state. -->
+                            <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1" id="user-menu">
+                                <a href="#" class="block px-4 py-2 text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem">Your Profile</a>
+                                <a href="#" class="block px-4 py-2 text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem">Settings</a>
+                                <a href="#" class="block px-4 py-2 text-base text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="sm:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="home.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                <a href="jobs.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Recent Jobs</a>
+                <a href="courses.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Courses</a>
+                <a href="learning.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Visualization</a>
+                <a href="resume.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium">Resume Analyzer</a>
+                <div class="mt-3 px-3 py-2">
+                    <div class="flex items-center">
+                        <img class="h-8 w-8 rounded-full" src="/api/placeholder/150/150" alt="User profile">
+                        <span class="ml-3 text-white font-medium text-lg">John Doe</span>
+                    </div>
+                </div>
+                <a href="#" class="text-white block px-3 py-2 rounded-md text-lg font-medium text-red-300 hover:bg-purple-700 transition-colors duration-200">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container mx-auto p-6">
+        <div class="max-w-4xl mx-auto my-8">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-600 to-blue-500 p-6 text-white">
+                    <h2 class="text-3xl font-bold">Career Learning Path</h2>
+                    <p class="mt-2 opacity-90">Define your career path and track your progress</p>
+                </div>
+                
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <label for="career" class="block text-sm font-medium text-gray-700 mb-2">Career Goal</label>
+                            <div class="relative">
+                                <input type="text" id="career" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 pl-4" placeholder="e.g., Machine Learning Engineer">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="numPoints" class="block text-sm font-medium text-gray-700 mb-2">Learning Points</label>
+                            <input type="number" id="numPoints" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" value="10" min="5" max="20">
+                        </div>
+                    </div>
+                    
+                    <button id="pathBtn" class="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 disabled:bg-gray-400 font-medium text-lg transition-colors duration-200">
                         Generate Learning Path
                     </button>
-                </div>
-                
-                <div class="mt-6 flex justify-between items-center">
-                    <div class="text-sm">
-                        <span id="completedCount">0</span> of <span id="totalStages">0</span> stages completed
+                    
+                    <div class="mt-8 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-3">
+                                <span id="completedCount">0</span>/<span id="totalStages">0</span>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Progress</h4>
+                                <p class="text-sm text-gray-500">Stages completed</p>
+                            </div>
+                        </div>
+                        <button id="resetBtn" class="text-sm text-red-600 hover:text-red-800 font-medium hidden border border-red-200 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors duration-200">
+                            Reset Progress
+                        </button>
                     </div>
-                    <button id="resetBtn" class="text-sm text-red-600 hover:text-red-800 hidden">
-                        Reset Progress
-                    </button>
+                    
+                    <div class="w-full bg-gray-200 rounded-full h-3 mt-4 overflow-hidden">
+                        <div id="progressBar" class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
                 </div>
                 
-                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div id="progressBar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                <div id="pathResults" class="hidden border-t border-gray-200">
+                    <div class="p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-800">Your Learning Path</h3>
+                            <button id="saveProgressBtn" class="bg-indigo-100 text-indigo-700 py-2 px-4 rounded-lg hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 hidden font-medium transition-colors duration-200">
+                                Save Progress
+                            </button>
+                        </div>
+                        
+                        <div id="pathLoader" class="loader hidden py-8"></div>
+                        <div id="learningPath" class="space-y-6 max-h-96 overflow-y-auto pr-2 pt-2">
+                            <!-- Learning path stages will appear here -->
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div id="pathResults" class="hidden">
-                <h3 class="text-lg font-semibold text-gray-700 mb-3">Your Learning Path</h3>
-                <div id="pathLoader" class="loader hidden"></div>
-                <div id="learningPath" class="space-y-1 mt-6 max-h-96 overflow-y-auto pr-2">
-                    <!-- Learning path stages will appear here -->
-                </div>
-                
-                <div class="mt-6 text-center">
-                    <button id="saveProgressBtn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 hidden">
-                        Save Progress
-                    </button>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
     
     <footer class="bg-gray-800 text-white p-6 mt-8">
@@ -212,11 +312,11 @@
             // Create a visual representation of the learning path with stages
             stages.forEach((point, index) => {
                 const stageDiv = document.createElement('div');
-                stageDiv.className = `path-stage flex mb-4 ${completed[index] ? 'completed-stage' : ''}`;
+                stageDiv.className = `path-stage flex mb-6 ${completed[index] ? 'completed-stage' : ''}`;
                 stageDiv.dataset.index = index;
                 
                 // Generate a color for the stage circle
-                const colors = ['bg-blue-500', 'bg-blue-600', 'bg-blue-700', 'bg-indigo-500', 'bg-indigo-600'];
+                const colors = ['bg-indigo-500', 'bg-indigo-600', 'bg-blue-500', 'bg-blue-600', 'bg-violet-500'];
                 const randomColor = colors[index % colors.length];
                 
                 // Determine if this stage is locked
@@ -227,7 +327,7 @@
                 
                 stageDiv.innerHTML = `
                     <div class="flex-shrink-0 mr-4">
-                        <div class="stage-number flex items-center justify-center w-12 h-12 ${randomColor} text-white rounded-full font-bold">
+                        <div class="stage-number flex items-center justify-center w-12 h-12 ${randomColor} text-white rounded-full font-bold shadow-md">
                             ${completed[index] ? 
                                 `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -236,23 +336,23 @@
                             }
                         </div>
                     </div>
-                    <div class="stage-content bg-white p-4 rounded-lg shadow border border-gray-200 flex-grow">
+                    <div class="stage-content bg-white p-5 rounded-xl shadow-md border border-gray-200 flex-grow hover:shadow-lg transition-shadow duration-200">
                         <div class="flex justify-between items-start">
-                            <h4 class="font-semibold text-gray-800">Stage ${index + 1}</h4>
+                            <h4 class="font-semibold text-gray-800 text-lg">Stage ${index + 1}</h4>
                             <div class="flex items-center">
                                 ${!isAvailable && !completed[index] ? 
-                                    `<span class="text-xs text-gray-500 mr-2">Complete previous stages first</span>` : 
+                                    `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2">Complete previous stages first</span>` : 
                                     ''
                                 }
                                 <label class="inline-flex items-center cursor-pointer ${!isAvailable ? 'locked-stage' : ''}">
-                                    <input type="checkbox" class="stage-checkbox w-4 h-4 text-green-600 rounded focus:ring-green-500" 
+                                    <input type="checkbox" class="stage-checkbox w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" 
                                         ${completed[index] ? 'checked' : ''}
                                         ${!isAvailable ? 'disabled' : ''}>
-                                    <span class="ml-2 text-sm text-gray-600">Completed</span>
+                                    <span class="ml-2 text-sm font-medium text-gray-600">Completed</span>
                                 </label>
                             </div>
                         </div>
-                        <p class="text-gray-600 mt-1">${point}</p>
+                        <p class="text-gray-600 mt-2">${point}</p>
                     </div>
                 `;
                 
@@ -273,15 +373,18 @@
                 completionDiv.className = 'path-stage flex';
                 completionDiv.innerHTML = `
                     <div class="flex-shrink-0 mr-4">
-                        <div class="stage-number flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full">
+                        <div class="stage-number flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full shadow-md">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
                     </div>
-                    <div class="bg-green-50 p-4 rounded-lg shadow border border-green-200 flex-grow">
-                        <h4 class="font-semibold text-green-800">Career Ready!</h4>
-                        <p class="text-green-700 mt-1">Congratulations! You've completed the learning path for ${careerInput.value}</p>
+                    <div class="bg-green-50 p-5 rounded-xl shadow-md border border-green-200 flex-grow">
+                        <div class="flex items-center mb-2">
+                            <h4 class="font-bold text-green-800 text-lg">Career Ready!</h4>
+                            <span class="ml-2 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">Achievement Unlocked</span>
+                        </div>
+                        <p class="text-green-700">Congratulations! You've completed the learning path for ${careerInput.value}</p>
                     </div>
                 `;
                 

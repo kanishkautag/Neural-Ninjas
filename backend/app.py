@@ -19,14 +19,20 @@ from courses import (
     search_course_subject
 )
 from resume_analyzer import extract_text_from_pdf, analyze_resume
+from config import settings
+
+# Import the JobSearchAgent - updated to match your file structure
+from agents import JobSearchAgent
 
 # Create FastAPI app
 app = FastAPI(
-    title="Learning Path & Course Recommendation API",
-    description="API for recommending courses and generating learning paths",
-    version="1.0.0"
+    title="Learning Path & Career Services API",
+    description="API for recommending courses, generating learning paths, and job searching",
+    version="1.1.0"
 )
 
+# Initialize the job search agent
+job_search_agent = JobSearchAgent()
 
 # Add CORS middleware to allow requests from frontend
 app.add_middleware(
@@ -85,6 +91,33 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     message: str
     conversation_history: List[ChatMessage]
+
+# Job Search models
+class JobSearchRequest(BaseModel):
+    industry: str
+    keywords: str
+    location: str
+    time_period: str
+
+class SkillsetRequest(BaseModel):
+    profession: str
+    experience_level: str
+
+class JobData(BaseModel):
+    title: str
+    link: str
+    snippet: str
+    source: str
+
+class JobSearchResponse(BaseModel):
+    jobs: List[JobData]
+    market_summary: str
+    query: Dict[str, Any]
+
+class SkillsetResponse(BaseModel):
+    profession: str
+    experience_level: str
+    skillset: Dict[str, List[str]]
 
 # API Routes - these endpoints will be consumed by your frontend
 
@@ -214,8 +247,52 @@ async def chat_with_ai(request: ChatRequest):
             content={"message": "Sorry, I'm having trouble processing your request right now."}
         )
 
+# Job Search Endpoints
+@app.post("/api/job-search", response_model=JobSearchResponse)
+async def search_jobs(request: JobSearchRequest):
+    """Search for jobs based on industry, keywords, location, and time period"""
+    try:
+        result = job_search_agent.search_jobs(
+            industry=request.industry,
+            keywords=request.keywords,
+            location=request.location,
+            time_period=request.time_period
+        )
+        
+        # Convert results to match the response model
+        jobs = [JobData(**job) for job in result.get("jobs", [])]
+        
+        return JobSearchResponse(
+            jobs=jobs,
+            market_summary=result.get("market_summary", ""),
+            query=result.get("query", {})
+        )
+    except Exception as e:
+        print(f"Error searching jobs: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error searching for jobs: {str(e)}"
+        )
 
-
+@app.post("/api/skillset", response_model=SkillsetResponse)
+async def get_skillset(request: SkillsetRequest):
+    try:
+        result = job_search_agent.get_professional_skillset(
+            profession=request.profession,
+            experience_level=request.experience_level
+        )
+        
+        return SkillsetResponse(
+            profession=result.get("profession", ""),
+            experience_level=result.get("experience_level", ""),
+            skillset=result.get("skillset", {})
+        )
+    except Exception as e:
+        print(f"Error getting skillset: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error retrieving skillset information: {str(e)}"
+        )
 # Health check endpoint
 @app.get("/api/health")
 async def health_check():
@@ -223,4 +300,4 @@ async def health_check():
     return {"status": "healthy"}
 
 if __name__=="__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host=settings.APP_HOST, port=settings.APP_PORT)
