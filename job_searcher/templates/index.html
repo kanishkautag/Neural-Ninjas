@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Navigation Bar -->
+    <nav class="bg-gray-800 py-4">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <div class="text-xl font-bold">Developer Network</div>
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-blue-400 font-semibold">Home</a>
+                <a href="#" class="hover:text-blue-400">Profile</a>
+                <a href="#" class="hover:text-blue-400">Job Openings</a>
+                <button id="logout-button" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 px-4">
+        <h1 class="text-4xl font-bold mb-8">Job Search Agent</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Search Job Information -->
+            <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4">Search Job Information</h2>
+                <form id="job-search-form">
+                    <div class="mb-4">
+                        <label for="industry" class="block text-sm text-gray-400 mb-1">Industry:</label>
+                        <input type="text" id="industry" name="industry" placeholder="e.g., software development, healthcare" 
+                               class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="keywords" class="block text-sm text-gray-400 mb-1">Keywords (comma separated):</label>
+                        <input type="text" id="keywords" name="keywords" placeholder="e.g., remote, AI, entry-level"
+                               class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="location" class="block text-sm text-gray-400 mb-1">Location:</label>
+                        <input type="text" id="location" name="location" placeholder="e.g., United States, London"
+                               class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="time-period" class="block text-sm text-gray-400 mb-1">Time Period:</label>
+                        <select id="time-period" name="time_period" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                            <option value="Past Week">Past Week</option>
+                            <option value="Past Month">Past Month</option>
+                            <option value="Past 3 Months">Past 3 Months</option>
+                            <option value="Any Time">Any Time</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition">
+                        Search
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Get Professional Skillset -->
+            <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                <h2 class="text-2xl font-bold mb-4">Get Professional Skillset</h2>
+                <form id="skillset-form">
+                    <div class="mb-4">
+                        <label for="profession" class="block text-sm text-gray-400 mb-1">Profession:</label>
+                        <input type="text" id="profession" name="profession" placeholder="e.g., data scientist, graphic designer"
+                               class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="experience-level" class="block text-sm text-gray-400 mb-1">Experience Level:</label>
+                        <select id="experience-level" name="experience_level" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                            <option value="Entry Level">Entry Level</option>
+                            <option value="Mid Level">Mid Level</option>
+                            <option value="Senior Level">Senior Level</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition">
+                        Get Skillset
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="results-container" class="mt-12">
+            <!-- Job Search Results -->
+            <div id="job-results" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Job Search Results</h2>
+                
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
+                    <h3 class="text-xl font-bold mb-2">Market Summary</h3>
+                    <div id="market-summary" class="text-gray-300"></div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4">Available Jobs</h3>
+                <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Job cards will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Skillset Results -->
+            <div id="skillset-results" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Professional Skillset</h2>
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <div id="skillset-details">
+                        <!-- Skillset details will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+</body>
+</html>
