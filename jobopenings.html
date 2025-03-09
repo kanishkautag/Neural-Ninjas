@@ -3,97 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Openings | Developer Network</title>
+    <title>Job Openings | Neural Ninjas</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(to right, #6366f1, #8b5cf6, #d946ef);
+        }
+        
+        .nav-underline {
+            position: relative;
+        }
+        
+        .nav-underline::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-underline:hover::after {
+            width: 80%;
+            left: 10%;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-white">
 
     <!-- Navigation Bar -->
-    <nav class="bg-gray-800 py-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="text-xl font-bold">Developer Network</div>
-            <div class="flex items-center space-x-4">
-                <a href="index.html" class="hover:text-blue-400">Home</a>
-                <a href="profile.html" class="hover:text-blue-400">Profile</a>
-                <a href="job_openings.html" class="text-blue-400 font-semibold">Job Openings</a>
-                <button id="logout-button" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Logout</button>
+    <nav class="gradient-bg shadow-lg sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="flex-shrink-0 flex items-center group">
+                        <i class="fas fa-brain text-white text-2xl mr-2 group-hover:animate-pulse transition-all duration-300"></i>
+                        <span class="text-white font-bold text-xl">Neural Ninjas</span>
+                    </a>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="flex items-center sm:hidden">
+                    <button id="theme-toggle-mobile" class="p-2 rounded-md text-white mr-2 hover:bg-purple-500 transition-colors" aria-label="Toggle theme">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-purple-500 transition-colors" aria-label="Open menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden sm:flex sm:items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium nav-underline transition-all">Home</a>
+                        <a href="#features" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium nav-underline transition-all">Features</a>
+                        <a href="jobopenings.html" class="text-white bg-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-all">Job Openings</a>
+                        <a href="#courses" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium nav-underline transition-all">Courses</a>
+                        <a href="#recommendations" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium nav-underline transition-all">Recommendations</a>
+                        <a href="#chatbot" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium nav-underline transition-all">AI Chatbot</a>
+                        <a href="#resume" class="text-white hover:bg-purple-600 px-3 py-2 rounded-md text-sm font-medium nav-underline transition-all">Resume Analyzer</a>
+                    </div>
+                    <div class="ml-6 flex items-center">
+                        <button id="theme-toggle" class="p-2 rounded-full text-white mr-2 hover:bg-purple-500 transition-colors" aria-label="Toggle theme">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:inline"></i>
+                        </button>
+                        <div class="relative ml-3">
+                            <div>
+                                <button type="button" class="bg-purple-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-800 focus:ring-white transition-all hover:ring-2" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                    <span class="sr-only">Open user menu</span>
+                                    <img class="h-8 w-8 rounded-full object-cover" src="/api/placeholder/150/150" alt="User profile">
+                                </button>
+                            </div>
+                            <!-- Dropdown menu -->
+                            <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none hidden backdrop-blur-md" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1" id="user-menu">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-purple-100 dark:hover:bg-purple-600 transition-colors" role="menuitem">Your Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-purple-100 dark:hover:bg-purple-600 transition-colors" role="menuitem">Settings</a>
+                                <a href="#" id="logout-link" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-purple-100 dark:hover:bg-purple-600 transition-colors" role="menuitem">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="sm:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-purple-600 transition-colors">Home</a>
+                <a href="#features" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-purple-600 transition-colors">Features</a>
+                <a href="jobopenings.html" class="text-white bg-purple-600 block px-3 py-2 rounded-md text-base font-medium transition-colors">Job Openings</a>
+                <a href="#courses" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-purple-600 transition-colors">Courses</a>
+                <a href="#recommendations" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-purple-600 transition-colors">Recommendations</a>
+                <a href="#chatbot" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-purple-600 transition-colors">AI Chatbot</a>
+                <a href="#resume" class="text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-purple-600 transition-colors">Resume Analyzer</a>
+                <div class="mt-3 px-3 py-2">
+                    <div class="flex items-center">
+                        <img class="h-8 w-8 rounded-full object-cover" src="/api/placeholder/150/150" alt="User profile">
+                        <span class="ml-3 text-white font-medium" id="user-name-mobile">User</span>
+                    </div>
+                </div>
+                <a href="#" id="logout-mobile" class="text-white block px-3 py-2 rounded-md text-base font-medium text-red-300 hover:bg-red-500 hover:text-white transition-colors">Logout</a>
             </div>
         </div>
     </nav>
 
+    <!-- Hero Section -->
+    <div class="gradient-bg py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
+                    Find Your Perfect AI Career
+                </h1>
+                <p class="max-w-xl mt-5 mx-auto text-xl text-purple-100">
+                    Discover AI-matched job opportunities based on your profile, skills, and preferences.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Filters Section -->
-    <div class="container mx-auto mt-6">
-        <h2 class="text-2xl font-bold mb-4">Find Jobs Matching Your Profile</h2>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-6 text-center">Find Jobs Matching Your Profile</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Location Filter -->
+                <div>
+                    <label for="filter-location" class="block text-sm font-medium text-purple-300 mb-2">Location</label>
+                    <div class="relative">
+                        <select id="filter-location" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-3 px-4 pr-8 text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <option value="">All Locations</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <!-- Location Filter -->
-            <div>
-                <label for="filter-location" class="text-sm text-gray-400">Location</label>
-                <select id="filter-location" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
-                    <option value="">All Locations</option>
-                </select>
+                <!-- Industry Filter -->
+                <div>
+                    <label for="filter-industry" class="block text-sm font-medium text-purple-300 mb-2">Industry</label>
+                    <div class="relative">
+                        <select id="filter-industry" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-3 px-4 pr-8 text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <option value="">All Industries</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div>
+                    <label for="search-job" class="block text-sm font-medium text-purple-300 mb-2">Search Job Title</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-job" placeholder="e.g. Machine Learning Engineer" class="block w-full bg-gray-700 border border-gray-600 rounded-md py-3 pl-10 pr-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                </div>
             </div>
-
-            <!-- Industry Filter -->
-            <div>
-                <label for="filter-industry" class="text-sm text-gray-400">Industry</label>
-                <select id="filter-industry" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
-                    <option value="">All Industries</option>
-                </select>
-            </div>
-
-            <!-- Search Bar -->
-            <div>
-                <label for="search-job" class="text-sm text-gray-400">Search Job Title</label>
-                <input type="text" id="search-job" placeholder="e.g. Frontend Developer"
-                    class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+            
+            <!-- Search Button -->
+            <div class="mt-6 text-center">
+                <button id="search-button" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors shadow-lg">
+                    <i class="fas fa-search mr-2"></i>
+                    Search Jobs
+                </button>
             </div>
         </div>
 
-        <!-- Search Button -->
-        <div class="mt-4 text-center">
-            <button id="search-button" class="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700">Search</button>
-        </div>
-    </div>
-
-    <!-- Get Professional Skillset Section -->
-    <div class="container mx-auto mt-8">
-        <h2 class="text-2xl font-bold mb-4">Get Professional Skillset</h2>
-
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div>
-                <label for="profession" class="text-sm text-gray-400">Profession</label>
-                <input type="text" id="profession" placeholder="e.g. Software Engineer"
-                    class="w-full p-3 bg-gray-700 rounded border border-gray-600 mb-4">
+        <!-- Jobs Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-lg p-4 flex items-center shadow-md">
+                <div class="rounded-full bg-blue-600 p-3 mr-4">
+                    <i class="fas fa-building text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm text-gray-400">Available Companies</h3>
+                    <p class="text-2xl font-bold" id="companies-count">42</p>
+                </div>
             </div>
-
-            <div>
-                <label for="experience-level" class="text-sm text-gray-400">Experience Level</label>
-                <select id="experience-level" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
-                    <option value="">Select Experience Level</option>
-                    <option value="easy">Easy</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="difficult">Difficult</option>
-                </select>
+            
+            <div class="bg-gray-800 rounded-lg p-4 flex items-center shadow-md">
+                <div class="rounded-full bg-purple-600 p-3 mr-4">
+                    <i class="fas fa-briefcase text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm text-gray-400">Open Positions</h3>
+                    <p class="text-2xl font-bold" id="jobs-count">156</p>
+                </div>
             </div>
-
-            <button id="get-started-button" class="bg-blue-600 px-6 py-3 mt-6 rounded hover:bg-blue-700">Get Started</button>
+            
+            <div class="bg-gray-800 rounded-lg p-4 flex items-center shadow-md">
+                <div class="rounded-full bg-pink-600 p-3 mr-4">
+                    <i class="fas fa-chart-line text-white text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm text-gray-400">Match Score</h3>
+                    <p class="text-2xl font-bold" id="match-score">87%</p>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Jobs Section -->
-    <div class="container mx-auto mt-8">
-        <h2 class="text-xl font-bold mb-4">Available Jobs</h2>
-        <div id="jobs-container" class="space-y-4">
-            <div id="loading-message" class="text-center text-gray-400">
-                Loading job openings...
+        <!-- Jobs Section -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">AI-Matched Jobs</h2>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-400 mr-2">Sort by:</span>
+                    <select id="sort-order" class="bg-gray-700 border border-gray-600 rounded-md py-1 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <option value="match">Match Score</option>
+                        <option value="date">Date Posted</option>
+                        <option value="salary">Salary</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="loading-message" class="col-span-full text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                    <p class="mt-4 text-gray-400">Loading job opportunities...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -112,6 +268,18 @@
         };
         firebase.initializeApp(firebaseConfig);
 
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User menu toggle
+        document.getElementById('user-menu-button').addEventListener('click', function() {
+            const userMenu = document.getElementById('user-menu');
+            userMenu.classList.toggle('hidden');
+        });
+
         // Fetch user profile from Firebase
         function fetchUserProfile() {
             const user = firebase.auth().currentUser;
@@ -125,13 +293,59 @@
                 .then(snapshot => {
                     const userData = snapshot.val();
                     if (userData) {
-                        const industry = userData.industry || 'All Industries';
-                        const location = userData.location || 'All Locations';
-
-                        document.getElementById('filter-industry').innerHTML = `<option value="${industry}">${industry}</option>`;
-                        document.getElementById('filter-location').innerHTML = `<option value="${location}">${location}</option>`;
+                        // Set user name in mobile menu
+                        const userName = userData.name || user.email || 'User';
+                        document.getElementById('user-name-mobile').textContent = userName;
                         
-                        // Now fetch jobs based on the user's profile
+                        // Populate filters with user data
+                        const industry = userData.industry || '';
+                        const location = userData.location || '';
+                        
+                        // Create industry options
+                        const industrySelect = document.getElementById('filter-industry');
+                        industrySelect.innerHTML = '<option value="">All Industries</option>';
+                        if (industry) {
+                            const option = document.createElement('option');
+                            option.value = industry;
+                            option.textContent = industry;
+                            option.selected = true;
+                            industrySelect.appendChild(option);
+                        }
+                        
+                        // Add more industry options
+                        const industries = ['AI/Machine Learning', 'Data Science', 'Software Engineering', 'Cloud Computing', 'Blockchain'];
+                        industries.forEach(ind => {
+                            if (ind !== industry) {
+                                const option = document.createElement('option');
+                                option.value = ind;
+                                option.textContent = ind;
+                                industrySelect.appendChild(option);
+                            }
+                        });
+                        
+                        // Create location options
+                        const locationSelect = document.getElementById('filter-location');
+                        locationSelect.innerHTML = '<option value="">All Locations</option>';
+                        if (location) {
+                            const option = document.createElement('option');
+                            option.value = location;
+                            option.textContent = location;
+                            option.selected = true;
+                            locationSelect.appendChild(option);
+                        }
+                        
+                        // Add more location options
+                        const locations = ['Remote', 'San Francisco, CA', 'New York, NY', 'Seattle, WA', 'Austin, TX', 'Boston, MA'];
+                        locations.forEach(loc => {
+                            if (loc !== location) {
+                                const option = document.createElement('option');
+                                option.value = loc;
+                                option.textContent = loc;
+                                locationSelect.appendChild(option);
+                            }
+                        });
+                        
+                        // Fetch jobs based on the user's profile
                         fetchJobs(industry, location);
                     }
                 })
@@ -139,76 +353,253 @@
         }
 
         // Fetch jobs from Firebase Database
-        function fetchJobs(industry, location) {
+        function fetchJobs(industry = '', location = '', searchTerm = '') {
             const jobContainer = document.getElementById('jobs-container');
-            jobContainer.innerHTML = '<p class="text-center text-gray-400">Loading job openings...</p>';
+            jobContainer.innerHTML = `
+                <div id="loading-message" class="col-span-full text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                    <p class="mt-4 text-gray-400">Loading job opportunities...</p>
+                </div>
+            `;
 
-            firebase.database().ref('jobs').once('value')
-                .then(snapshot => {
-                    jobContainer.innerHTML = '';
-                    let jobCount = 0;
-
-                    snapshot.forEach(childSnapshot => {
-                        const job = childSnapshot.val();
-
-                        // Filter jobs based on user's industry and location
-                        if ((job.industry === industry || industry === 'All Industries') &&
-                            (job.location === location || location === 'All Locations')) {
-                            renderJobCard(job);
-                            jobCount++;
-                        }
-                    });
-
-                    if (jobCount === 0) {
-                        jobContainer.innerHTML = '<p class="text-center text-gray-400">No job openings found.</p>';
+            // For demonstration, we'll create some sample jobs
+            // In a real app, this would fetch from Firebase
+            setTimeout(() => {
+                const sampleJobs = [
+                    {
+                        id: 'job1',
+                        title: 'Machine Learning Engineer',
+                        company: 'TechAI Solutions',
+                        location: 'San Francisco, CA',
+                        type: 'Full-time',
+                        salary: '$120,000 - $150,000',
+                        matchScore: 95,
+                        description: 'Design and implement machine learning models to solve complex problems.',
+                        skills: ['TensorFlow', 'PyTorch', 'Python', 'Deep Learning'],
+                        postedDate: '2 days ago',
+                        industry: 'AI/Machine Learning'
+                    },
+                    {
+                        id: 'job2',
+                        title: 'Data Scientist',
+                        company: 'DataMind Corp',
+                        location: 'Remote',
+                        type: 'Full-time',
+                        salary: '$110,000 - $135,000',
+                        matchScore: 92,
+                        description: 'Analyze large datasets to extract insights and develop predictive models.',
+                        skills: ['Python', 'SQL', 'Data Visualization', 'Statistical Analysis'],
+                        postedDate: '3 days ago',
+                        industry: 'Data Science'
+                    },
+                    {
+                        id: 'job3',
+                        title: 'AI Research Scientist',
+                        company: 'Neural Dynamics',
+                        location: 'Boston, MA',
+                        type: 'Full-time',
+                        salary: '$130,000 - $160,000',
+                        matchScore: 89,
+                        description: 'Conduct cutting-edge research in artificial intelligence and develop novel algorithms.',
+                        skills: ['Deep Learning', 'NLP', 'Reinforcement Learning', 'Python'],
+                        postedDate: '1 week ago',
+                        industry: 'AI/Machine Learning'
+                    },
+                    {
+                        id: 'job4',
+                        title: 'Computer Vision Engineer',
+                        company: 'VisionTech AI',
+                        location: 'Seattle, WA',
+                        type: 'Full-time',
+                        salary: '$125,000 - $155,000',
+                        matchScore: 87,
+                        description: 'Develop computer vision algorithms for real-time object detection and recognition.',
+                        skills: ['OpenCV', 'PyTorch', 'Object Detection', 'Image Processing'],
+                        postedDate: '5 days ago',
+                        industry: 'AI/Machine Learning'
+                    },
+                    {
+                        id: 'job5',
+                        title: 'AI Product Manager',
+                        company: 'Innovate AI',
+                        location: 'New York, NY',
+                        type: 'Full-time',
+                        salary: '$115,000 - $145,000',
+                        matchScore: 85,
+                        description: 'Lead the development of AI-powered products from conception to launch.',
+                        skills: ['Product Management', 'AI', 'Agile', 'Market Research'],
+                        postedDate: '1 week ago',
+                        industry: 'AI/Machine Learning'
+                    },
+                    {
+                        id: 'job6',
+                        title: 'NLP Engineer',
+                        company: 'LangTech AI',
+                        location: 'Remote',
+                        type: 'Full-time',
+                        salary: '$120,000 - $150,000',
+                        matchScore: 83,
+                        description: 'Build and improve natural language processing systems and algorithms.',
+                        skills: ['NLP', 'BERT', 'Transformer Models', 'Python'],
+                        postedDate: '3 days ago',
+                        industry: 'AI/Machine Learning'
                     }
-                })
-                .catch(error => console.error("Error fetching jobs:", error));
+                ];
+
+                // Filter jobs based on input criteria
+                let filteredJobs = sampleJobs;
+                
+                if (industry) {
+                    filteredJobs = filteredJobs.filter(job => job.industry === industry);
+                }
+                
+                if (location) {
+                    filteredJobs = filteredJobs.filter(job => job.location === location);
+                }
+                
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredJobs = filteredJobs.filter(job => 
+                        job.title.toLowerCase().includes(term) || 
+                        job.company.toLowerCase().includes(term) ||
+                        job.description.toLowerCase().includes(term)
+                    );
+                }
+                
+                // Sort by match score (default)
+                const sortOrder = document.getElementById('sort-order').value;
+                if (sortOrder === 'match') {
+                    filteredJobs.sort((a, b) => b.matchScore - a.matchScore);
+                } else if (sortOrder === 'date') {
+                    // Simple sort for demo purposes
+                    filteredJobs.sort((a, b) => {
+                        if (a.postedDate.includes('day') && b.postedDate.includes('week')) return -1;
+                        if (a.postedDate.includes('week') && b.postedDate.includes('day')) return 1;
+                        return 0;
+                    });
+                } else if (sortOrder === 'salary') {
+                    // Simple sort for demo purposes (by min salary)
+                    filteredJobs.sort((a, b) => {
+                        const aMin = parseInt(a.salary.split(' - ')[0].replace(/\D/g, ''));
+                        const bMin = parseInt(b.salary.split(' - ')[0].replace(/\D/g, ''));
+                        return bMin - aMin;
+                    });
+                }
+
+                // Update stats
+                document.getElementById('jobs-count').textContent = filteredJobs.length;
+                document.getElementById('companies-count').textContent = [...new Set(filteredJobs.map(job => job.company))].length;
+                
+                // Get average match score
+                const avgMatchScore = filteredJobs.length > 0 
+                    ? Math.round(filteredJobs.reduce((sum, job) => sum + job.matchScore, 0) / filteredJobs.length)
+                    : 0;
+                document.getElementById('match-score').textContent = avgMatchScore + '%';
+
+                // Render jobs
+                jobContainer.innerHTML = '';
+                
+                if (filteredJobs.length === 0) {
+                    jobContainer.innerHTML = `
+                        <div class="col-span-full text-center py-12 bg-gray-800 rounded-lg">
+                            <i class="fas fa-search text-4xl text-gray-600 mb-4"></i>
+                            <p class="text-gray-400">No job openings found. Try adjusting your filters.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                filteredJobs.forEach(job => {
+                    renderJobCard(job);
+                });
+            }, 1000); // Simulate loading delay
         }
 
         // Render a job card
         function renderJobCard(job) {
             const jobContainer = document.getElementById('jobs-container');
-            const jobCard = `
-                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                    <h3 class="text-lg font-bold">${job.title}</h3>
-                    <p class="text-gray-400">${job.company}</p>
-                    <p class="text-sm text-gray-500">${job.location}</p>
-                    <div class="text-sm text-gray-300">${job.description}</div>
-                    <a href="${job.applyLink}" class="text-blue-400 mt-2 block">Apply Now</a>
+            
+            // Create match score color
+            let matchColor = 'bg-red-500';
+            if (job.matchScore >= 90) {
+                matchColor = 'bg-green-500';
+            } else if (job.matchScore >= 80) {
+                matchColor = 'bg-blue-500';
+            } else if (job.matchScore >= 70) {
+                matchColor = 'bg-yellow-500';
+            }
+            
+            const jobCard = document.createElement('div');
+            jobCard.className = 'bg-gray-800 rounded-lg overflow-hidden border border-gray-700 shadow-lg card-hover';
+            jobCard.innerHTML = `
+                <div class="relative">
+                    <div class="absolute top-0 right-0 m-3 px-2 py-1 rounded-full ${matchColor} text-xs font-bold text-white">
+                        ${job.matchScore}% Match
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-lg font-bold truncate">${job.title}</h3>
+                        <p class="text-purple-300">${job.company}</p>
+                        <div class="flex items-center text-sm text-gray-400 mt-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span>${job.location}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400 mt-1">
+                            <i class="fas fa-briefcase mr-2"></i>
+                            <span>${job.type}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400 mt-1">
+                            <i class="fas fa-money-bill-wave mr-2"></i>
+                            <span>${job.salary}</span>
+                        </div>
+                        <div class="my-3 border-t border-gray-700"></div>
+                        <div class="text-sm">${job.description}</div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            ${job.skills.map(skill => 
+                                `<span class="px-2 py-1 bg-gray-700 text-xs rounded-full">${skill}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 px-<div class="bg-gray-700 px-5 py-3 flex justify-between items-center">
+                        <span class="text-xs text-gray-400">Posted ${job.postedDate}</span>
+                        <button class="px-3 py-1 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors">
+                            Apply Now
+                        </button>
+                    </div>
                 </div>
             `;
-            jobContainer.innerHTML += jobCard;
+            jobContainer.appendChild(jobCard);
         }
 
-        // Handle Logout
-        document.getElementById('logout-button').addEventListener('click', () => {
-            firebase.auth().signOut().then(() => window.location.href = 'login.html');
-        });
-
-        // Handle Search Button Click
-        document.getElementById('search-button').addEventListener('click', () => {
+        // Event listeners
+        document.getElementById('search-button').addEventListener('click', function() {
             const industry = document.getElementById('filter-industry').value;
             const location = document.getElementById('filter-location').value;
-            const jobTitle = document.getElementById('search-job').value;
-
-            // Call fetchJobs with the selected filters
-            fetchJobs(industry, location, jobTitle);
+            const searchTerm = document.getElementById('search-job').value;
+            fetchJobs(industry, location, searchTerm);
         });
 
-        // Handle Get Started Button Click
-        document.getElementById('get-started-button').addEventListener('click', () => {
-            const profession = document.getElementById('profession').value;
-            const experienceLevel = document.getElementById('experience-level').value;
-
-            if (!profession || !experienceLevel) {
-                alert("Please fill in all fields.");
-            } else {
-                alert(`Profession: ${profession}\nExperience Level: ${experienceLevel}`);
-            }
+        document.getElementById('sort-order').addEventListener('change', function() {
+            const industry = document.getElementById('filter-industry').value;
+            const location = document.getElementById('filter-location').value;
+            const searchTerm = document.getElementById('search-job').value;
+            fetchJobs(industry, location, searchTerm);
         });
 
-        // On page load
+        // Logout functionality
+        document.getElementById('logout-link').addEventListener('click', handleLogout);
+        document.getElementById('logout-mobile').addEventListener('click', handleLogout);
+
+        function handleLogout() {
+            firebase.auth().signOut()
+                .then(() => {
+                    window.location.href = 'login.html';
+                })
+                .catch(error => {
+                    console.error('Error signing out:', error);
+                });
+        }
+
+        // Check authentication state and initialize the page
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 fetchUserProfile();
@@ -217,5 +608,61 @@
             }
         });
     </script>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-6 md:mb-0">
+                    <a href="#" class="flex items-center">
+                        <i class="fas fa-brain text-white text-2xl mr-2"></i>
+                        <span class="text-white font-bold text-xl">Neural Ninjas</span>
+                    </a>
+                    <p class="mt-2 text-purple-200 max-w-md">
+                        Empowering your AI career journey with personalized job matching and skill development.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h3 class="text-sm font-semibold text-purple-300 tracking-wider uppercase">Features</h3>
+                        <ul class="mt-4 space-y-2">
+                            <li><a href="#" class="text-purple-200 hover:text-white">Job Matching</a></li>
+                            <li><a href="#" class="text-purple-200 hover:text-white">Skill Assessment</a></li>
+                            <li><a href="#" class="text-purple-200 hover:text-white">Career Path</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-purple-300 tracking-wider uppercase">Support</h3>
+                        <ul class="mt-4 space-y-2">
+                            <li><a href="#" class="text-purple-200 hover:text-white">Help Center</a></li>
+                            <li><a href="#" class="text-purple-200 hover:text-white">Contact Us</a></li>
+                            <li><a href="#" class="text-purple-200 hover:text-white">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-purple-300 tracking-wider uppercase">Connect</h3>
+                        <div class="mt-4 flex space-x-4">
+                            <a href="#" class="text-purple-200 hover:text-white">
+                                <i class="fab fa-twitter text-xl"></i>
+                            </a>
+                            <a href="#" class="text-purple-200 hover:text-white">
+                                <i class="fab fa-linkedin text-xl"></i>
+                            </a>
+                            <a href="#" class="text-purple-200 hover:text-white">
+                                <i class="fab fa-github text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-purple-700 pt-6 flex flex-col md:flex-row justify-between">
+                <p class="text-purple-300">&copy; 2025 Neural Ninjas. All rights reserved.</p>
+                <div class="mt-4 md:mt-0">
+                    <a href="#" class="text-purple-300 hover:text-white mr-4">Terms of Service</a>
+                    <a href="#" class="text-purple-300 hover:text-white">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
