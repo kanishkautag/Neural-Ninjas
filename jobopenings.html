@@ -27,6 +27,43 @@
             </div>
         </div>
     </nav>
+
+    <!-- Filters Section -->
+    <div class="container mx-auto mt-6">
+        <h2 class="text-2xl font-bold mb-4">Find Jobs Matching Your Profile</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <!-- Location Filter -->
+            <div>
+                <label for="filter-location" class="text-sm text-gray-400">Location</label>
+                <select id="filter-location" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    <option value="">All Locations</option>
+                </select>
+            </div>
+
+            <!-- Industry Filter -->
+            <div>
+                <label for="filter-industry" class="text-sm text-gray-400">Industry</label>
+                <select id="filter-industry" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+                    <option value="">All Industries</option>
+                </select>
+            </div>
+
+            <!-- Search Bar -->
+            <div>
+                <label for="search-job" class="text-sm text-gray-400">Search Job Title</label>
+                <input type="text" id="search-job" placeholder="e.g. Frontend Developer"
+                    class="w-full p-3 bg-gray-700 rounded border border-gray-600">
+            </div>
+        </div>
+
+        <!-- Search Button -->
+        <div class="mt-4 text-center">
+            <button id="search-button" class="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700">Search</button>
+        </div>
+    </div>
+
+    <!-- Get Professional Skillset Section -->
     <div class="container mx-auto mt-8">
         <h2 class="text-2xl font-bold mb-4">Get Professional Skillset</h2>
 
@@ -180,44 +217,5 @@
             }
         });
     </script>
-
-    <!-- Filters Section -->
-    <div class="container mx-auto mt-6">
-        <h2 class="text-2xl font-bold mb-4">Find Jobs Matching Your Profile</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <!-- Location Filter -->
-            <div>
-                <label for="filter-location" class="text-sm text-gray-400">Location</label>
-                <select id="filter-location" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
-                    <option value="">All Locations</option>
-                </select>
-            </div>
-
-            <!-- Industry Filter -->
-            <div>
-                <label for="filter-industry" class="text-sm text-gray-400">Industry</label>
-                <select id="filter-industry" class="w-full p-3 bg-gray-700 rounded border border-gray-600">
-                    <option value="">All Industries</option>
-                </select>
-            </div>
-
-            <!-- Search Bar -->
-            <div>
-                <label for="search-job" class="text-sm text-gray-400">Search Job Title</label>
-                <input type="text" id="search-job" placeholder="e.g. Frontend Developer"
-                    class="w-full p-3 bg-gray-700 rounded border border-gray-600">
-            </div>
-            <div class="mt-4 text-left">
-                <button id="search-button" class="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700">Search</button>
-            </div>
-        </div>
-        </div>
-
-        <!-- Search Button -->
-      
-
-    <!-- Get Professional Skillset Section -->
-  
 </body>
 </html>
