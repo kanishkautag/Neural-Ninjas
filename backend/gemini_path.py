@@ -9,6 +9,7 @@ load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyC2XzjZZBh5CAFvJl8uZSe3MDUfqZBsYjA")
 if API_KEY:
     genai.configure(api_key=API_KEY)
+gmodel = genai.GenerativeModel('gemini-1.5-pro')
 
 # Sample career paths for fallback/demo purposes
 SAMPLE_PATHS = {

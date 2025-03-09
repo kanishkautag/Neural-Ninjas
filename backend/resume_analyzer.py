@@ -1,6 +1,7 @@
 import fitz  # PyMuPDF for PDF text extraction
 import ollama  # AI model for resume analysis
 from fastapi import HTTPException
+from gemini_path import gmodel
 
 def extract_text_from_pdf(file_content):
     """Extracts text from a PDF file content"""
@@ -16,7 +17,7 @@ def extract_text_from_pdf(file_content):
 def analyze_resume(resume_text):
     """Uses Ollama AI to analyze the resume"""
     try:
-        model = "mistral"  # Ollama model
+        model = "llama3.2:1b"  # Ollama model
         prompt = f"""
         You are an expert resume analyst. Evaluate the following resume content:
         
