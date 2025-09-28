@@ -76,7 +76,9 @@ It combines live job listings, course suggestions, ATS-style resume feedback, an
 6. **Roadmap Generation**  
    Combines all data (user profile, courses, jobs) to suggest milestones & steps (skills to learn, courses to take) over time.
 
----
+## Demo/Screenshots
+<img width="1695" height="836" alt="image" src="https://github.com/user-attachments/assets/07ee2569-d92a-4640-aa34-4ea65d67a41f" />
+
 
 - Integrated **Serper API** for fetching and filtering live jobs.  
 - Built **Course Recommendation logic** using the Udemy dataset (mapping levels, filtering domain courses).  
