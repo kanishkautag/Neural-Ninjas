@@ -1,4 +1,4 @@
-# Neural Ninjas 💼
+# SkillMorph 💼
 
 **A career recommendation platform** built during a hackathon.  
 It combines live job listings, course suggestions, ATS-style resume feedback, and personalized roadmap generation — all powered by APIs, datasets, and AI logic.
